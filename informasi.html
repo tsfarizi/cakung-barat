@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Informasi - Kelurahan Cakung Barat</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ====== Hero Profil Custom ====== */
+    .hero-profile {
+      background: #054569;
+      color: white;
+      text-align: center;
+      padding: 100px 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 -4px 10px rgba(0,0,0,0.1) inset; /* bayangan halus di bagian atas */
+      position: relative;
+    }
+
+    .hero-profile::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 8px;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.2), transparent);
+    }
+
+    .hero-profile h2 {
+      font-size: 2.2rem;
+      margin-bottom: 15px;
+      font-weight: 700;
+    }
+
+    .hero-profile p {
+      font-size: 1.1rem;
+      opacity: 0.9;
+      max-width: 800px;
+    }
+
+    /* Tambah efek shadow pada navbar bawah */
+    .navbar {
+      box-shadow: 0 4px 10px rgba(0,0,0,0.50);
+    }
+
+    /* ======== Styling Bagian Informasi ======== */
+    .hero {
+      background:linear-gradient(rgba(44,90,160,.6),rgba(44,90,160,.6)), url('assets/img/hero-bg.jpg');
+      background-size: cover;
+      background-position: center;
+      color: white;
+      text-align: center;
+      padding: 100px 20px;
+      margin-bottom: 50px;
+    }
+
+    .information-section {
+      padding: 50px 0 80px;
+    }
+
+    .information-container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
+      margin-bottom: 50px;
+    }
+
+    .info-card {
+      background: white;
+      border-radius: 10px;
+      padding: 30px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .info-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .info-card h3 {
+      color: #2c3e50;
+      margin-bottom: 15px;
+      font-size: 1.4rem;
+      border-bottom: 2px solid #3498db;
+      padding-bottom: 10px;
+    }
+
+    .info-card p {
+      color: #666;
+      line-height: 1.6;
+      margin-bottom: 15px;
+    }
+
+    .guide-section {
+      background: #f8f9fa;
+      border-radius: 10px;
+      padding: 40px;
+      margin-top: 40px;
+    }
+
+    .guide-section h2 {
+      color: #2c3e50;
+      margin-bottom: 25px;
+      text-align: center;
+      font-size: 1.8rem;
+    }
+
+    .guide-steps {
+      counter-reset: step-counter;
+    }
+
+    .guide-step {
+      background: white;
+      padding: 20px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      border-left: 4px solid #3498db;
+      position: relative;
+      padding-left: 60px;
+    }
+
+    .guide-step::before {
+      counter-increment: step-counter;
+      content: counter(step-counter);
+      position: absolute;
+      left: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: #3498db;
+      color: white;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+
+    .website-link {
+      display: inline-block;
+      background: #3498db;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 5px;
+      text-decoration: none;
+      margin: 15px 0;
+      transition: background 0.3s;
+    }
+
+    .website-link:hover {
+      background: #2980b9;
+    }
+
+    .info-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .info-tag {
+      background: #e3f2fd;
+      color: #1976d2;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    @media (max-width: 768px) {
+      .hero {
+        padding: 60px 15px;
+      }
+      
+      .hero h1 {
+        font-size: 2rem;
+      }
+      
+      .hero p {
+        font-size: 1rem;
+      }
+      
+      .guide-section {
+        padding: 25px;
+      }
+      
+      .info-card {
+        padding: 20px;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .info-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .guide-step {
+        padding-left: 50px;
+      }
+      
+      .guide-step::before {
+        left: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="navbar">
+  <div class="container">
+    <div class="logo">
+      <img src="assets/img/logo.png" alt="Logo">
+      <span>Cakung Barat</span>
+    </div>
+
+    <nav class="nav-menu">
+      <ul>
+        <li><a href="index.html">Beranda</a></li>
+        <li><a href="profil.html">Profil</a></li>
+        <li><a href="pelayanan.html">Pelayanan</a></li>
+        <li><a href="informasi.html" class="active">Informasi</a></li>
+        <li><a href="galeri.html">Galeri</a></li>
+        <li><a href="kontak.html">Kontak</a></li>
+      </ul>
+    </nav>
+
+    <!-- Tools (Kanan) -->
+    <div class="nav-tools">
+      <!-- Search -->
+      <div class="search-box">
+        <input type="text" id="search-input" placeholder="Cari...">
+        <button id="search-btn"><i class="fa fa-search"></i></button>
+      </div>
+
+      <!-- Translate -->
+      <div class="translate">
+        <button id="translate-btn"><i class="fa fa-globe"></i></button>
+        <select id="language-select">
+          <option value="id">Indonesia</option>
+          <option value="en">English</option>
+        </select>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- Hero Section -->
+<section class="hero">
+  <div class="hero-content">
+    <h1>Informasi Kelurahan</h1>
+    <p>Temukan berita terkini, pengumuman penting, dan artikel menarik seputar kegiatan dan program di Kelurahan Cakung Barat.</p>
+  </div>
+</section>
+
+<!-- Informasi Section -->
+<section class="information-section">
+  <div class="container information-container">
+    <div class="info-grid">
+      <!-- Informasi 1 -->
+      <div class="info-card">
+        <h3>Berita Terkini</h3>
+        <p>Kelurahan Cakung Barat meraih penghargaan "Kelurahan Terbaik" dalam kategori pelayanan publik tahun 2024 dari Pemerintah Provinsi DKI Jakarta.</p>
+        <p>Penghargaan ini diberikan atas komitmen kami dalam memberikan pelayanan terbaik kepada masyarakat.</p>
+        <div class="info-tags">
+          <span class="info-tag">Berita</span>
+          <span class="info-tag">Penghargaan</span>
+        </div>
+      </div>
+
+      <!-- Informasi 2 -->
+      <div class="info-card">
+        <h3>Pengumuman Penting</h3>
+        <p>Diberitahukan kepada seluruh warga Kelurahan Cakung Barat bahwa mulai tanggal 1 Februari 2025, pelayanan administrasi kependudukan dapat dilakukan secara online melalui platform JAKEVO.</p>
+        <p>Pelayanan offline tetap tersedia di kantor kelurahan dengan protokol kesehatan yang ketat.</p>
+        <div class="info-tags">
+          <span class="info-tag">Pengumuman</span>
+          <span class="info-tag">Pelayanan</span>
+        </div>
+      </div>
+
+      <!-- Informasi 3 -->
+      <div class="info-card">
+        <h3>Kegiatan Mendatang</h3>
+        <p>Pada tanggal 15 Februari 2025 akan diselenggarakan kegiatan kerja bakti massal serentak di seluruh RW se-Kelurahan Cakung Barat.</p>
+        <p>Kegiatan dimulai pukul 07.00 WIB. Partisipasi seluruh warga sangat diharapkan untuk menjaga kebersihan lingkungan.</p>
+        <div class="info-tags">
+          <span class="info-tag">Kegiatan</span>
+          <span class="info-tag">Kerja Bakti</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panduan JAKEVO -->
+    <div class="guide-section">
+      <h2>Panduan Pelayanan Online melalui JAKEVO</h2>
+      <p>Ikuti langkah-langkah berikut untuk menggunakan layanan online Kelurahan Cakung Barat melalui website JAKEVO:</p>
+      
+      <a href="https://jakevo.jakarta.go.id" class="website-link" target="_blank">
+        <i class="fas fa-external-link-alt"></i> Akses Website JAKEVO
+      </a>
+      
+      <div class="guide-steps">
+        <div class="guide-step">
+          Buka website https://jakevo.jakarta.go.id
+        </div>
+        <div class="guide-step">
+          Buat akun terlebih dahulu jika belum memiliki
+        </div>
+        <div class="guide-step">
+          Pilih dashboard → klik PM-1 Lurah/Camat
+        </div>
+        <div class="guide-step">
+          Pilih jenis pelayanan yang diinginkan
+        </div>
+        <div class="guide-step">
+          Isi data sesuai KTP dan upload berkas yang dibutuhkan
+        </div>
+        <div class="guide-step">
+          Submit formulir dan tunggu status selesai
+        </div>
+      </div>
+      
+      <div style="margin-top: 20px; padding: 15px; background: #e8f5e9; border-radius: 5px;">
+        <strong>Informasi:</strong> Untuk bantuan teknis penggunaan JAKEVO, silakan hubungi helpdesk kami di (021) 4601234.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <div class="container footer-grid">
+    <div>
+      <h4>Kelurahan Cakung Barat</h4>
+      <p>Jl Tipar Cakung Pool PPD Depo C RT.02/07<br>Kecamatan Cakung, Jakarta Timur 13910</p>
+    </div>
+    <div>
+      <h4>Tautan Terkait</h4>
+      <ul>
+        <li><a href="https://jakarta.go.id" target="_blank">Portal DKI Jakarta</a></li>
+        <li><a href="https://timur.jakarta.go.id/kecamatan/Cakung" target="_blank">Kecamatan Cakung</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Hubungi Kami</h4>
+      <p>Email: cakungbarat.64@gmail.com<br>Telp: (021) 4601748</p>
+    </div>
+  </div>
+  <p class="copyright">© 2025 Kelurahan Cakung Barat</p>
+</footer>
+
+<!-- Chatbot -->
+<div class="chatbot">
+  <img src="assets/img/chat-icon.png" id="chat-toggle">
+  <div class="chat-window" id="chat-window">
+    <div class="chat-header">
+      <h4>Chatbot Cakung Barat</h4>
+      <button id="chat-close">&times;</button>
+    </div>
+    <div class="chat-body" id="chat-body">
+      <div class="bot-message">Halo! Ada yang bisa kami bantu?</div>
+    </div>
+    <div class="chat-input">
+      <input type="text" id="chat-input" placeholder="Ketik pesan...">
+      <button id="send-btn">Kirim</button>
+    </div>
+  </div>
+</div>
+
+<script src="assets/js/script.js"></script>
+</body>
+</html>

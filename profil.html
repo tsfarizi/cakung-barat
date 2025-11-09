@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profil | Kelurahan Cakung Barat</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ====== Hero Profil Custom ====== */
+    
+    .hero-profile {
+      background: #054569;
+      color: white;
+      text-align: center;
+      padding: 100px 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 -4px 10px rgba(0,0,0,0.1) inset; /* bayangan halus di bagian atas */
+      position: relative;
+    }
+
+    .hero-profile::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 8px;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.2), transparent);
+    }
+
+    .hero-profile h2 {
+      font-size: 2.2rem;
+      margin-bottom: 15px;
+      font-weight: 700;
+    }
+
+    .hero-profile p {
+      font-size: 1.1rem;
+      opacity: 0.9;
+      max-width: 800px;
+    }
+
+    /* Tambah efek shadow pada navbar bawah */
+    .navbar {
+      box-shadow: 0 4px 10px rgba(0,0,0,0.50);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="navbar">
+    <div class="container">
+      <div class="logo">
+        <img src="assets/img/logo.png" alt="Logo">
+        <span>Cakung Barat</span>
+      </div>
+
+      <nav class="nav-menu">
+        <ul>
+          <li><a href="index.html">Beranda</a></li>
+          <li><a href="profil.html" class="active">Profil</a></li>
+          <li><a href="pelayanan.html">Pelayanan</a></li>
+          <li><a href="informasi.html">Informasi</a></li>
+          <li><a href="galeri.html">Galeri</a></li>
+          <li><a href="kontak.html">Kontak</a></li>
+        </ul>
+      </nav>
+
+      <div class="nav-tools">
+        <div class="search-box">
+          <input type="text" id="search-input" placeholder="Cari...">
+          <button id="search-btn"><i class="fa fa-search"></i></button>
+        </div>
+
+        <div class="translate">
+          <button id="translate-btn"><i class="fa fa-globe"></i></button>
+          <select id="language-select">
+            <option value="id">Indonesia</option>
+            <option value="en">English</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Profil Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1>Profil Kelurahan Cakung Barat</h1>
+      <p>Mengenal lebih dekat Kelurahan Cakung Barat, dari Sejarah hingga Struktur Organisasi yang Melayani Masyarakat</p>
+    </div>
+  </section>
+
+  <!-- Sejarah -->
+  <section class="content-section">
+    <div class="container">
+      <h2 class="title-vertical">Sejarah</h2>
+      <div class="content-box">
+        <p>
+          Wilayah Cakung berada di Kota Administrasi Jakarta Timur dan memiliki peran penting dalam perkembangan wilayah Jakarta. 
+          Dahulu, Cakung Barat masih berupa lahan persawahan serta perkampungan dengan aktivitas utama pertanian. 
+          Seiring berjalannya waktu, wilayah ini berkembang menjadi kawasan padat penduduk dengan beragam fasilitas umum 
+          seperti sekolah, pasar, dan pusat pelayanan masyarakat.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Perubahan Wilayah -->
+  <section class="content-section">
+    <div class="container">
+      <h2 class="title-vertical">Perubahan Wilayah Administratif</h2>
+      <div class="content-box">
+        <p>
+          Pada tahun 1981, terjadi perubahan batas wilayah di Provinsi DKI Jakarta yang menjadikan 
+          Kelurahan Cakung Barat sebagai salah satu wilayah administratif baru. 
+          Kelurahan ini berada di bawah Kecamatan Cakung, Jakarta Timur, dan terus mengalami perkembangan pesat 
+          dalam berbagai sektor pemerintahan dan pelayanan publik.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Struktur Organisasi -->
+<section class="content-section">
+  <div class="container">
+    <h2 class="title-horizontal">Struktur Organisasi Kelurahan Cakung Barat</h2>
+    <div class="content-box structure-box" style="overflow-x:auto;">
+      
+      <!-- Struktur Organisasi Tampilan User -->
+      <div style="background: linear-gradient(135deg, #1e5a7d 0%, #2d7ba5 100%); min-height: 800px; padding: 20px; position: relative;">
+        <div class="logo" style="position: absolute; top: 20px; left: 20px; width: 80px; height: 80px; background: white; border-radius: 10px; padding: 5px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center;">
+          <img src="assets/img/logo.png" alt="Logo Cakung Barat" style="width: 100%; height: 100%; object-fit: contain; border-radius: 8px;">
+        </div>
+
+        <div class="container" style="max-width: 1600px; margin: 0 auto; padding-top: 30px;">
+          <div class="org-chart" id="orgChart" style="position: relative; padding: 50px 20px; min-height: 900px; overflow-x: auto; overflow-y: visible; white-space: nowrap;">
+            <svg id="linesSVG" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1;"></svg>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<script>
+// Data struktur organisasi (diambil dari localStorage atau data default)
+function getOrgData() {
+  // Coba ambil dari localStorage (data yang sudah diisi admin)
+  const savedData = localStorage.getItem('strukturOrganisasi');
+  if (savedData) {
+    return JSON.parse(savedData);
+  }
+  
+  // Jika belum ada data, gunakan data default kosong
+  return [
+    // Level 0: Lurah
+    { id: 1, name: "", position: "PJS LURAH\nKELURAHAN CAKUNG BARAT", photo: "", parentId: null, x: 600, y: 30 },
+
+    // Level 1: Sekretaris
+    { id: 2, name: "", position: "SEKRETARIS\nKELURAHAN CAKUNG BARAT", photo: "", parentId: 1, x: 1050, y: 180, branch: "right" },
+
+    // Level 2: Bendahara & Pengurus
+    { id: 3, name: "", position: "BENDAHARA", photo: "", parentId: 2, x: 920, y: 380 },
+    { id: 4, name: "", position: "PENGURUS BARANG", photo: "", parentId: 2, x: 1180, y: 380 },
+
+    // Level 1-2: 3 Kasi
+    { id: 5, name: "", position: "KASI PEMERINTAHAN", photo: "", parentId: 1, x: 80, y: 380, branch: "left" },
+    { id: 6, name: "", position: "KASI EKONOMI\nPEMBANGUNAN", photo: "", parentId: 1, x: 370, y: 380, branch: "middle" },
+    { id: 7, name: "", position: "KASI KESEJAHTERAAN\nRAKYAT", photo: "", parentId: 1, x: 660, y: 380, branch: "middle" },
+
+    // Level 3: Staff
+    { id: 8, name: "", position: "STAF PEMERINTAHAN", photo: "", parentId: 5, x: 80, y: 600 },
+    { id: 9, name: "", position: "STAF EKONOMI\nPEMBANGUNAN", photo: "", parentId: 6, x: 370, y: 600 },
+    { id: 10, name: "", position: "STAF KESEJAHTERAAN\nRAKYAT", photo: "", parentId: 7, x: 660, y: 600 }
+  ];
+}
+
+const orgData = getOrgData();
+
+/* === Render struktur (hanya tampilan, tanpa fitur edit) === */
+function renderChart() {
+  const chart = document.getElementById('orgChart');
+  chart.querySelectorAll('.member-card').forEach(c => c.remove());
+
+  orgData.forEach(member => {
+    const card = document.createElement('div');
+    card.className = 'member-card';
+    card.dataset.id = member.id;
+    card.style.left = member.x + 'px';
+    card.style.top = member.y + 'px';
+    card.style.position = 'absolute';
+    card.style.background = 'white';
+    card.style.borderRadius = '15px';
+    card.style.padding = '14px';
+    card.style.boxShadow = '0 6px 12px rgba(0,0,0,0.15)';
+    card.style.textAlign = 'center';
+    card.style.zIndex = '2';
+    card.style.width = '200px';
+    card.style.minHeight = '80px';
+    card.style.height = 'auto';
+    card.style.display = 'inline-block';
+    card.style.whiteSpace = 'normal';
+    card.style.overflowWrap = 'break-word';
+    card.style.wordBreak = 'break-word';
+    
+    // Hover effect yang lebih halus (tanpa cursor pointer)
+    card.style.transition = 'all 0.3s ease';
+    card.onmouseenter = () => {
+      card.style.transform = 'translateY(-2px)';
+      card.style.boxShadow = '0 8px 16px rgba(0,0,0,0.2)';
+    };
+    card.onmouseleave = () => {
+      card.style.transform = 'translateY(0)';
+      card.style.boxShadow = '0 6px 12px rgba(0,0,0,0.15)';
+    };
+
+    // Tampilkan foto jika ada, atau icon default jika tidak ada
+    const photoContent = member.photo ? 
+      `<img src="${member.photo}" alt="${member.name}" style="width: 100%; height: 100%; object-fit: cover; display: block;">` :
+      '<div style="font-size: 24px; color: #999;">👤</div>';
+
+    // Tampilkan nama jika ada, atau jabatan saja jika tidak ada nama
+    const nameContent = member.name ? member.name : member.position.split('\\n')[0];
+
+    card.innerHTML = `
+      <div class="photo-container" style="width: 80px; height: 80px; margin: 0 auto 10px; border-radius: 50%; overflow: hidden; border: 3px solid #2d7ba5; background: #e0e0e0; display: flex; align-items: center; justify-content: center;">
+        ${photoContent}
+      </div>
+      <div class="member-name" style="font-weight: 700; font-size: 13px; margin-bottom: 6px; color: #333; min-height: 20px;">${nameContent}</div>
+      <div class="member-position" style="font-size: 12px; color: #666; line-height: 1.3; white-space: normal; overflow-wrap: anywhere; word-break: break-word; display: block; margin-top: 4px;">${member.position.replace(/\\n/g, '<br>')}</div>
+    `;
+
+    chart.appendChild(card);
+  });
+
+  drawLines();
+}
+
+/* === Gambar garis antar elemen === */
+function drawLines() {
+  const chart = document.getElementById('orgChart');
+  const svg = document.getElementById('linesSVG');
+  svg.innerHTML = '';
+
+  // Set lebar & tinggi SVG sesuai area konten
+  const width = Math.max(chart.scrollWidth, chart.clientWidth);
+  const height = Math.max(chart.scrollHeight, chart.clientHeight);
+  svg.setAttribute('width', width);
+  svg.setAttribute('height', height);
+  svg.style.width = width + 'px';
+  svg.style.height = height + 'px';
+
+  const makeLine = (x1, y1, x2, y2) => {
+    const l = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    l.setAttribute('x1', x1);
+    l.setAttribute('y1', y1);
+    l.setAttribute('x2', x2);
+    l.setAttribute('y2', y2);
+    l.setAttribute('stroke', 'white');
+    l.setAttribute('stroke-width', '2');
+    l.setAttribute('stroke-linecap', 'round');
+    svg.appendChild(l);
+  };
+
+  const getCenter = (id) => {
+    const el = chart.querySelector(`.member-card[data-id="${id}"]`);
+    if (!el) return { x: 0, y: 0 };
+    const rect = el.getBoundingClientRect();
+    const chartRect = chart.getBoundingClientRect();
+    return {
+      x: (rect.left - chartRect.left) + chart.scrollLeft + rect.width / 2,
+      y: (rect.top - chartRect.top) + chart.scrollTop + rect.height / 2
+    };
+  };
+
+  // ambil titik-titik penting
+  const L = getCenter(1);
+  const S = getCenter(2);
+  const B = getCenter(3);
+  const P = getCenter(4);
+  const K1 = getCenter(5);
+  const K2 = getCenter(6);
+  const K3 = getCenter(7);
+  const ST1 = getCenter(8);
+  const ST2 = getCenter(9);
+  const ST3 = getCenter(10);
+
+  const splitY = L.y + 120;
+
+  // Lurah ke split
+  makeLine(L.x, L.y + 40, L.x, splitY);
+
+  // Lurah -> Sekretaris
+  makeLine(L.x, splitY, S.x, splitY);
+  makeLine(S.x, splitY, S.x, S.y - 40);
+
+  // Sekretaris -> Bendahara & Pengurus
+  const midY2 = (S.y + B.y) / 2;
+  makeLine(S.x, S.y + 40, S.x, midY2);
+  makeLine(B.x, midY2, P.x, midY2);
+  makeLine(B.x, midY2, B.x, B.y - 40);
+  makeLine(P.x, midY2, P.x, P.y - 40);
+
+  // Lurah -> 3 Kasi
+  makeLine(K1.x, splitY, K3.x, splitY);
+  makeLine(K1.x, splitY, K1.x, K1.y - 40);
+  makeLine(K2.x, splitY, K2.x, K2.y - 40);
+  makeLine(K3.x, splitY, K3.x, K3.y - 40);
+
+  // Kasi -> Staff
+  const midStaffY = (K1.y + ST1.y) / 2;
+  makeLine(ST1.x, midStaffY, ST3.x, midStaffY);
+  makeLine(K1.x, K1.y + 40, ST1.x, midStaffY);
+  makeLine(K2.x, K2.y + 40, ST2.x, midStaffY);
+  makeLine(K3.x, K3.y + 40, ST3.x, midStaffY);
+  makeLine(ST1.x, midStaffY, ST1.x, ST1.y - 40);
+  makeLine(ST2.x, midStaffY, ST2.x, ST2.y - 40);
+  makeLine(ST3.x, midStaffY, ST3.x, ST3.y - 40);
+}
+
+/* === Auto resize untuk parent jika diperlukan === */
+function sendSizeToParent() {
+  const height = document.body.scrollHeight;
+  if (window.parent && window.parent !== window) {
+    window.parent.postMessage({
+      type: 'strukturSize',
+      height: height
+    }, '*');
+  }
+}
+
+/* === Render awal dan auto redraw === */
+window.addEventListener('load', () => {
+  renderChart();
+  setTimeout(() => {
+    drawLines();
+    sendSizeToParent();
+  }, 200);
+});
+
+window.addEventListener('resize', () => {
+  drawLines();
+  sendSizeToParent();
+});
+
+// Listen untuk update data dari admin (jika menggunakan broadcast channel)
+if (typeof BroadcastChannel !== 'undefined') {
+  const channel = new BroadcastChannel('struktur_organisasi');
+  channel.addEventListener('message', (event) => {
+    if (event.data.type === 'updateStruktur') {
+      // Reload data dan render ulang
+      orgData = getOrgData();
+      renderChart();
+      setTimeout(drawLines, 100);
+    }
+  });
+}
+
+// Update data secara periodik (fallback)
+setInterval(() => {
+  const newData = getOrgData();
+  const currentData = JSON.stringify(orgData);
+  if (JSON.stringify(newData) !== currentData) {
+    orgData = newData;
+    renderChart();
+    setTimeout(drawLines, 100);
+  }
+}, 2000); // Check setiap 2 detik
+</script>
+
+  <script>
+    window.addEventListener('message', function(event) {
+      if (event.data.type === 'strukturSize') {
+        const iframe = document.getElementById('strukturFrame');
+        iframe.style.height = event.data.height + 'px';
+        iframe.style.width = '100%'; // biar lebar tetap fix, ga ngezoom
+      }
+    });
+  </script>
+
+  <!-- Footer -->
+<footer>
+  <div class="container footer-grid">
+    <div>
+      <h4>Kelurahan Cakung Barat</h4>
+      <p>Jl Tipar Cakung Pool PPD Depo C RT.02/07<br>Kecamatan Cakung, Jakarta Timur 13910</p>
+    </div>
+    <div>
+      <h4>Tautan Terkait</h4>
+      <ul>
+        <li><a href="https://jakarta.go.id" target="_blank">Portal DKI Jakarta</a></li>
+        <li><a href="https://timur.jakarta.go.id/kecamatan/Cakung" target="_blank">Kecamatan Cakung</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Hubungi Kami</h4>
+      <p>Email: cakungbarat.64@gmail.com<br>Telp: (021) 4601748</p>
+    </div>
+  </div>
+  <p class="copyright">© 2025 Kelurahan Cakung Barat</p>
+</footer>
+
+  <!-- Chatbot -->
+  <div class="chatbot">
+    <img src="assets/img/chat-icon.png" alt="Chat" id="chat-toggle">
+    <div class="chat-window" id="chat-window">
+      <div class="chat-header">
+        <h4>Chatbot Cakung Barat</h4>
+        <button id="chat-close">&times;</button>
+      </div>
+      <div class="chat-body" id="chat-body">
+        <div class="bot-message">Halo! Ada yang bisa kami bantu?</div>
+      </div>
+      <div class="chat-input">
+        <input type="text" id="chat-input" placeholder="Ketik pesan...">
+        <button id="send-btn">Kirim</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/js/script.js"></script>
+</body>
+</html>
