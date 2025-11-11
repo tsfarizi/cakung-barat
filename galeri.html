@@ -26,7 +26,7 @@
 
     .gallery-container {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
       gap: 30px;
     }
 
@@ -140,6 +140,10 @@
     .navbar {
       box-shadow: 0 4px 10px rgba(0,0,0,0.50);
     }
+    .gallery-item {
+  cursor: pointer;
+}
+
   </style>
 </head>
 <body>
@@ -224,13 +228,15 @@
 
     </div>
   </div>
+
   <script>
 const galleryData = JSON.parse(localStorage.getItem('galleryData') || '[]');
 const container = document.querySelector('.gallery-container');
+const driveURL = "https://drive.google.com/drive/folders/1M_knB8yRSrRHlhDW3HSxuV8aYTjZGL47?usp=drive_link";
 
 if (galleryData.length > 0) {
   const newItems = galleryData.map(item => `
-    <div class="gallery-item">
+    <div class="gallery-item" onclick="window.open('${driveURL}', '_blank')">
       <div class="gallery-img" style="background-image:url('${item.img}')"></div>
       <div class="gallery-content">
         <h3>${item.title}</h3>
@@ -238,7 +244,8 @@ if (galleryData.length > 0) {
       </div>
     </div>
   `).join('');
-  container.innerHTML += newItems;
+
+  container.insertAdjacentHTML('beforeend', newItems);
 }
 </script>
 

@@ -665,6 +665,21 @@ window.addEventListener('resize', checkHeightChange);
 </script>
 
 
+<script>
+window.addEventListener("load", function() {
+  const body = document.body;
+  const html = document.documentElement;
+  const height = Math.max(body.scrollHeight, html.scrollHeight);
+  const width = Math.max(body.scrollWidth, html.scrollWidth);
+
+  // kirim ukuran ke profil.html
+  window.parent.postMessage({
+    type: "strukturSize",
+    height: height + 50, // tambahkan sedikit jarak bawah
+    width: width
+  }, "*");
+});
+</script>
 
 </body>
 </html>

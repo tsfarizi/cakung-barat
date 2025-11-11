@@ -142,6 +142,119 @@
     .navbar {
       box-shadow: 0 4px 10px rgba(0,0,0,0.50);
     }
+
+    .guide-section {
+      background: #f8f9fa;
+      border-radius: 10px;
+      padding: 40px;
+      margin-top: 40px;
+    }
+
+    .guide-section h2 {
+      color: #2c3e50;
+      margin-bottom: 25px;
+      text-align: center;
+      font-size: 1.8rem;
+    }
+
+    .guide-steps {
+      counter-reset: step-counter;
+    }
+
+    .guide-step {
+      background: white;
+      padding: 20px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      border-left: 4px solid #3498db;
+      position: relative;
+      padding-left: 60px;
+    }
+
+    .guide-step::before {
+      counter-increment: step-counter;
+      content: counter(step-counter);
+      position: absolute;
+      left: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: #3498db;
+      color: white;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+
+    @media (max-width: 768px) {
+      .hero {
+        padding: 60px 15px;
+      }
+      
+      .hero h1 {
+        font-size: 2rem;
+      }
+      
+      .hero p {
+        font-size: 1rem;
+      }
+      
+      .guide-section {
+        padding: 25px;
+      }
+      
+      .info-card {
+        padding: 20px;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .info-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .guide-step {
+        padding-left: 50px;
+      }
+      
+      .guide-step::before {
+        left: 15px;
+      }
+    }
+
+    .website-link {
+      display: inline-block;
+      background: #3498db;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 5px;
+      text-decoration: none;
+      margin: 15px 0;
+      transition: background 0.3s;
+    }
+
+    .website-link:hover {
+      background: #2980b9;
+    }
+
+    .info-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .info-tag {
+      background: #e3f2fd;
+      color: #1976d2;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
   </style>
 </head>
 <body>
@@ -192,7 +305,7 @@
 <!-- Konten Pelayanan -->
 <section>
   <div class="service-container">
-    <h1>Pengajuan Surat Penelitian dan Magang</h1>
+    <h1 align="center">Pengajuan Surat Penelitian dan Magang</h1>
 
     <p class="description">
       Layanan ini ditujukan bagi mahasiswa atau pihak yang memerlukan surat pengantar untuk keperluan penelitian
@@ -238,8 +351,46 @@
     <div class="note">
       <p>Catatan: Untuk mengajukan surat, silakan datang ke kantor Kelurahan Cakung Barat dengan membawa dokumen yang diperlukan.</p>
     </div>
+    
+
+
+    <!-- Panduan JAKEVO -->
+    <div class="guide-section">
+      <h2>Panduan Pelayanan Online melalui JAKEVO</h2>
+      <p>Ikuti langkah-langkah berikut untuk menggunakan layanan online Kelurahan Cakung Barat melalui website JAKEVO:</p>
+      
+      <a href="https://jakevo.jakarta.go.id" class="website-link" target="_blank">
+        <i class="fas fa-external-link-alt"></i> Akses Website JAKEVO
+      </a>
+      
+      <div class="guide-steps">
+        <div class="guide-step">
+          Buka website https://jakevo.jakarta.go.id
+        </div>
+        <div class="guide-step">
+          Buat akun terlebih dahulu jika belum memiliki
+        </div>
+        <div class="guide-step">
+          Pilih dashboard → klik PM-1 Lurah/Camat
+        </div>
+        <div class="guide-step">
+          Pilih jenis pelayanan yang diinginkan
+        </div>
+        <div class="guide-step">
+          Isi data sesuai KTP dan upload berkas yang dibutuhkan
+        </div>
+        <div class="guide-step">
+          Submit formulir dan tunggu status selesai
+        </div>
+      </div>
+      
+      <div style="margin-top: 20px; padding: 15px; background: #e8f5e9; border-radius: 5px;">
+        <strong>Informasi:</strong> Untuk bantuan teknis penggunaan JAKEVO, silakan hubungi helpdesk kami di (021) 4601234.
+      </div>
+
   </div>
 </section>
+
 
 <!-- Footer -->
 <footer>

@@ -24,17 +24,34 @@
         <li><a href="profil.html">Profil</a></li>
         <li><a href="pelayanan.html">Pelayanan</a></li>
         <li><a href="informasi.html">Informasi</a></li>
-        <li><a href="galeri.html" class="active">Dashboard Galeri</a></li>
+        <li><a href="galeri.html" class="active">Galeri</a></li>
         <li><a href="kontak.html">Kontak</a></li>
       </ul>
     </nav>
+    <!-- Tools (Kanan) -->
+    <div class="nav-tools">
+      <!-- Search -->
+      <div class="search-box">
+        <input type="text" id="search-input" placeholder="Cari...">
+        <button id="search-btn"><i class="fa fa-search"></i></button>
+      </div>
+
+      <!-- Translate -->
+      <div class="translate">
+        <button id="translate-btn"><i class="fa fa-globe"></i></button>
+        <select id="language-select">
+          <option value="id">Indonesia</option>
+          <option value="en">English</option>
+        </select>
+      </div>
+    </div>
   </div>
 </header>
 
 <!-- Hero -->
 <section class="hero">
   <div class="hero-content">
-    <h1>Dashboard Galeri</h1>
+    <h1>Galeri</h1>
     <p>Upload foto kegiatan baru untuk ditampilkan di halaman galeri publik.</p>
   </div>
 </section>
@@ -517,30 +534,6 @@ function deleteGallery(index) {
     renderGallery();
   }
 }
-
-document.getElementById('add-gallery').addEventListener('click', function() {
-  const title = document.getElementById('judul').value.trim();
-  const desc = document.getElementById('deskripsi').value.trim();
-  const fileInput = document.getElementById('gambar');
-  const file = fileInput.files[0];
-
-  if (!title || !desc || !file) {
-    alert('Semua kolom wajib diisi dan gambar harus diupload!');
-    return;
-  }
-
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    const imgData = e.target.result;
-    const galleryData = JSON.parse(localStorage.getItem('galleryData') || '[]');
-    galleryData.push({ title, desc, img: imgData });
-    localStorage.setItem('galleryData', JSON.stringify(galleryData));
-    alert('Galeri berhasil ditambahkan!');
-    renderGallery();
-    document.getElementById('gallery-form').reset();
-  };
-  reader.readAsDataURL(file);
-});
 
 renderGallery();
 </script>
