@@ -9,7 +9,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
-    /* ======== Styling Bagian Galeri ======== */
     .hero {
       background:linear-gradient(rgba(44,90,160,.6),rgba(44,90,160,.6)), url('assets/img/hero-bg.jpg');
       background-size: cover;
@@ -36,6 +35,7 @@
       overflow: hidden;
       box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
       transition: transform 0.3s, box-shadow 0.3s;
+      cursor: pointer;
     }
 
     .gallery-item:hover {
@@ -100,7 +100,6 @@
       }
     }
 
-    /* ====== Hero Profil Custom ====== */
     .hero-profile {
       background: #054569;
       color: white;
@@ -110,7 +109,7 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      box-shadow: 0 -4px 10px rgba(0,0,0,0.1) inset; /* bayangan halus di bagian atas */
+      box-shadow: 0 -4px 10px rgba(0,0,0,0.1) inset;
       position: relative;
     }
 
@@ -136,19 +135,13 @@
       max-width: 800px;
     }
 
-    /* Tambah efek shadow pada navbar bawah */
     .navbar {
       box-shadow: 0 4px 10px rgba(0,0,0,0.50);
     }
-    .gallery-item {
-  cursor: pointer;
-}
-
   </style>
 </head>
 <body>
 
-<!-- Header -->
 <header class="navbar">
   <div class="container">
     <div class="logo">
@@ -167,15 +160,12 @@
       </ul>
     </nav>
 
-    <!-- Tools (Kanan) -->
     <div class="nav-tools">
-      <!-- Search -->
       <div class="search-box">
         <input type="text" id="search-input" placeholder="Cari...">
         <button id="search-btn"><i class="fa fa-search"></i></button>
       </div>
 
-      <!-- Translate -->
       <div class="translate">
         <button id="translate-btn"><i class="fa fa-globe"></i></button>
         <select id="language-select">
@@ -187,7 +177,6 @@
   </div>
 </header>
 
-<!-- Hero Section -->
 <section class="hero">
   <div class="hero-content">
     <h1>Galeri Kegiatan</h1>
@@ -195,11 +184,9 @@
   </div>
 </section>
 
-<!-- Galeri Section -->
 <section class="gallery-section">
   <div class="container">
     <div class="gallery-container">
-      <!-- Item 1 -->
       <div class="gallery-item">
         <div class="gallery-img" style="background-image: url('https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?auto=format&fit=crop&w=800&q=80');"></div>
         <div class="gallery-content">
@@ -208,7 +195,6 @@
         </div>
       </div>
 
-      <!-- Item 2 -->
       <div class="gallery-item">
         <div class="gallery-img" style="background-image: url('https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=800&q=80');"></div>
         <div class="gallery-content">
@@ -217,7 +203,6 @@
         </div>
       </div>
 
-      <!-- Item 3 -->
       <div class="gallery-item">
         <div class="gallery-img" style="background-image: url('https://images.unsplash.com/photo-1593115057322-e94b77572f20?auto=format&fit=crop&w=800&q=80');"></div>
         <div class="gallery-content">
@@ -225,14 +210,49 @@
           <p>Acara lomba dan upacara memperingati Hari Kemerdekaan Indonesia.</p>
         </div>
       </div>
-
     </div>
   </div>
 
   <script>
-const galleryData = JSON.parse(localStorage.getItem('galleryData') || '[]');
+const API_BASE_URL = 'https://cakung-barat-server-1065513777845.asia-southeast1.run.app';
 const container = document.querySelector('.gallery-container');
 const driveURL = "https://drive.google.com/drive/folders/1M_knB8yRSrRHlhDW3HSxuV8aYTjZGL47?usp=drive_link";
+
+async function fetchGalleryFromAPI() {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/postings`, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log('Data dari API:', data);
+    
+    if (data && data.assets && data.assets.length > 0) {
+      const apiItems = data.assets.map(item => `
+        <div class="gallery-item" onclick="window.open('${driveURL}', '_blank')">
+          <div class="gallery-img" style="background-image:url('${item.url || 'https://via.placeholder.com/400x300'}')"></div>
+          <div class="gallery-content">
+            <h3>${item.name || 'Tanpa Judul'}</h3>
+            <p>${item.description || 'Tidak ada deskripsi'}</p>
+          </div>
+        </div>
+      `).join('');
+      
+      container.insertAdjacentHTML('beforeend', apiItems);
+    }
+  } catch (error) {
+    console.error('Error fetching gallery:', error);
+  }
+}
+
+const galleryData = JSON.parse(localStorage.getItem('galleryData') || '[]');
 
 if (galleryData.length > 0) {
   const newItems = galleryData.map(item => `
@@ -247,14 +267,11 @@ if (galleryData.length > 0) {
 
   container.insertAdjacentHTML('beforeend', newItems);
 }
+
+fetchGalleryFromAPI();
 </script>
-
-
 </section>
 
-
-
-<!-- Footer -->
 <footer>
   <div class="container footer-grid">
     <div>
@@ -276,7 +293,6 @@ if (galleryData.length > 0) {
   <p class="copyright">© 2025 Kelurahan Cakung Barat</p>
 </footer>
 
-<!-- Chatbot -->
 <div class="chatbot">
   <img src="assets/img/chat-icon.png" id="chat-toggle">
   <div class="chat-window" id="chat-window">
