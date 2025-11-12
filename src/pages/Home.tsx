@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import PostCard from '../components/PostCard';
 import { usePageHeader } from '../contexts/PageHeaderContext';
 
@@ -117,7 +116,7 @@ const Home: React.FC = () => {
                 <div className="font-bold text-xl mb-4">Ikuti Kami</div>
                 <div className="flex flex-wrap gap-4">
                   <a href="https://www.instagram.com/kelurahan_cakungbarat?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-full bg-linear-to-r from-purple-500 to-pink-500 flex items-center justify-center">
                       <i className="fab fa-instagram text-white text-xl"></i>
                     </div>
                   </a>
