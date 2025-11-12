@@ -2,10 +2,8 @@
 import React from 'react';
 import {
   Card,
-  CardContent,
   CardDescription,
   CardFooter,
-  CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -31,12 +29,12 @@ const PostCard: React.FC<PostCardProps> = ({ post }) => {
           {post.category}
         </div>
       </div>
-      <div className="p-6 flex flex-col flex-grow">
+      <div className="p-6 flex flex-col grow">
         <div className="flex items-center text-sm text-gray-500 mb-3">
           <span>{post.date}</span>
         </div>
         <CardTitle className="text-xl font-bold text-gray-800 mb-3 line-clamp-2">{post.title}</CardTitle>
-        <CardDescription className="text-gray-600 mb-4 flex-grow">{post.excerpt}</CardDescription>
+        <CardDescription className="text-gray-600 mb-4 grow">{post.excerpt}</CardDescription>
         <CardFooter className="p-0 pt-4 mt-auto">
           <Button variant="link" className="p-0 font-semibold text-blue-600 hover:underline hover:text-blue-800 transition-colors">
             Baca Selengkapnya 

@@ -17,7 +17,7 @@ const members = orgData as Member[];
 
 const MemberCard: React.FC<{ member: Member }> = ({ member }) => (
   <div
-    className="absolute bg-white rounded-xl p-3 shadow-lg text-center z-20 w-52 min-h-[9rem] flex flex-col justify-center"
+    className="absolute bg-white rounded-xl p-3 shadow-lg text-center z-20 w-52 min-h-36 flex flex-col justify-center"
     style={{ left: `${member.x}px`, top: `${member.y}px` }}
   >
     <div className="w-20 h-20 mx-auto mb-2 rounded-full overflow-hidden border-4 border-blue-400 bg-gray-200 flex items-center justify-center">
