@@ -100,7 +100,7 @@ const StrukturOrganisasi: React.FC = () => {
       <div className="max-w-6xl mx-auto text-center">
         <h2 className="text-3xl font-bold text-gray-800 mb-2">Struktur Organisasi</h2>
         <p className="text-gray-600 mb-8">Kelurahan Cakung Barat</p>
-        <div className="bg-gradient-to-b from-accent to-blue-700 rounded-2xl p-2 md:p-10 shadow-inner overflow-hidden relative">
+        <div className="bg-linear-to-b from-accent to-blue-700 rounded-2xl p-2 md:p-10 shadow-inner overflow-hidden relative">
             <TransformWrapper
                 initialScale={0.7}
                 minScale={0.5}

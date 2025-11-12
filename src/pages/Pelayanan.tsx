@@ -55,19 +55,59 @@ const Pelayanan: React.FC = () => {
             <p className="text-gray-600 mt-2">Berikut adalah daftar layanan PTSP (Pelayanan Terpadu Satu Pintu) yang dapat diajukan melalui platform JAKEVO:</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {ptspServices.map((service, index) => {
-              return (
-                <div key={service.id} className="flex">
-                  <ServiceItem
-                    number={service.id}
-                    title={service.name}
-                    description={service.description}
-                    index={index}
-                  />
-                </div>
-              );
-            })}
+          <div className="space-y-6">
+            {(() => {
+              const rows = [];
+              let currentIndex = 0;
+              
+              while (currentIndex < ptspServices.length) {
+                // Determine how many items in this row (3, then 2, alternating)
+                const isOddRow = Math.floor(currentIndex / 3) % 2 === 0; // First row (0) is odd for 3 items
+                let itemsInRow = isOddRow ? 
+                  Math.min(3, ptspServices.length - currentIndex) : 
+                  Math.min(2, ptspServices.length - currentIndex);
+                
+                // If only 1 item is left, make it span the entire row
+                if (ptspServices.length - currentIndex === 1) {
+                  itemsInRow = 1;
+                }
+                
+                // Create a row element
+                let rowClass = '';
+                if (itemsInRow === 3) {
+                  rowClass = 'grid grid-cols-1 md:grid-cols-3 gap-6';
+                } else if (itemsInRow === 2) {
+                  rowClass = 'grid grid-cols-1 md:grid-cols-2 gap-6';
+                } else { // itemsInRow === 1
+                  rowClass = 'grid grid-cols-1 md:grid-cols-3 gap-6';
+                }
+                
+                rows.push(
+                  <div 
+                    key={`row-${currentIndex}`} 
+                    className={rowClass}
+                  >
+                    {ptspServices.slice(currentIndex, currentIndex + itemsInRow).map((service, serviceIndex) => {
+                      const globalIndex = currentIndex + serviceIndex;
+                      return (
+                        <div key={service.id} className={itemsInRow === 1 ? 'md:col-span-3' : ''}>
+                          <ServiceItem
+                            number={service.id}
+                            title={service.name}
+                            description={service.description}
+                            index={globalIndex}
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+                
+                currentIndex += itemsInRow;
+              }
+              
+              return rows;
+            })()}
           </div>
         </div>
 

@@ -350,6 +350,12 @@ const AccordionItem: React.FC<{
   isOpen: boolean;
   onClick: () => void;
 }> = ({ category, services, isOpen, onClick }) => {
+  const [openServiceIndex, setOpenServiceIndex] = useState<number | null>(null);
+
+  const handleServiceClick = (index: number) => {
+    setOpenServiceIndex(openServiceIndex === index ? null : index);
+  };
+
   return (
     <Card className="mb-4 overflow-hidden">
       <div className="p-4 cursor-pointer bg-gray-100 hover:bg-gray-200" onClick={onClick}>
@@ -364,14 +370,34 @@ const AccordionItem: React.FC<{
             transition={{ duration: 0.3 }}
           >
             <CardContent className="p-4">
-              {services.map((service, index) => (
-                <div key={index} className="mb-4">
-                  <h4 className="font-bold text-md text-gray-700">{service.name}</h4>
-                  <ul className="list-disc list-inside mt-2 space-y-1 text-gray-600">
-                    {service.requirements.map((req, i) => (
-                      <li key={i}>{req}</li>
-                    ))}
-                  </ul>
+              {services.map((service, serviceIndex) => (
+                <div key={serviceIndex} className="mb-4 border border-gray-200 rounded-md overflow-hidden">
+                  <div 
+                    className="p-3 cursor-pointer bg-gray-50 hover:bg-gray-100"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleServiceClick(serviceIndex);
+                    }}
+                  >
+                    <h4 className="font-bold text-md text-gray-700">{service.name}</h4>
+                  </div>
+                  <AnimatePresence>
+                    {openServiceIndex === serviceIndex && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="p-3 bg-white"
+                      >
+                        <ul className="list-disc list-inside space-y-1 text-gray-600">
+                          {service.requirements.map((req, reqIndex) => (
+                            <li key={reqIndex}>{req}</li>
+                          ))}
+                        </ul>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               ))}
             </CardContent>

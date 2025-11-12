@@ -20,6 +20,15 @@ export default {
         btn: '#9CCDDC',
         'highlight': '#ffbe33',
       },
+      keyframes: {
+        fadeInSlide: {
+          '0%': { opacity: '0', transform: 'translateX(-20px)' },
+          '100%': { opacity: '1', transform: 'translateX(0)' },
+        }
+      },
+      animation: {
+        fadeInSlide: 'fadeInSlide 0.8s ease-out forwards',
+      }
     },
   },
   plugins: [],
