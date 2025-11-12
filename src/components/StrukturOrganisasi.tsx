@@ -1,19 +1,10 @@
 import React from 'react';
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
-import orgData from '../assets/data/struktur.json';
-import logo from '../assets/img/logo.png';
+import orgData from '../data/struktur';
+import type { Member } from '../data/struktur';
 
-interface Member {
-  id: number;
-  name: string;
-  position: string;
-  photo: string;
-  parentId: number | null;
-  x: number;
-  y: number;
-}
 
-const members = orgData as Member[];
+const members = orgData;
 
 const MemberCard: React.FC<{ member: Member }> = ({ member }) => (
   <div
@@ -28,9 +19,9 @@ const MemberCard: React.FC<{ member: Member }> = ({ member }) => (
       )}
     </div>
     <div className="font-bold text-sm text-gray-800">{member.name || member.position.split('\n')[0]}</div>
-    <div 
-      className="text-xs text-gray-600 leading-tight mt-1" 
-      dangerouslySetInnerHTML={{ __html: member.position.replace(/\n/g, '<br />') }} 
+    <div
+      className="text-xs text-gray-600 leading-tight mt-1"
+      dangerouslySetInnerHTML={{ __html: member.position.replace(/\n/g, '<br />') }}
     />
   </div>
 );
@@ -95,6 +86,9 @@ const Lines: React.FC = () => {
 };
 
 const StrukturOrganisasi: React.FC = () => {
+  // Import logo image
+  const logoImg = new URL('/logo.png', import.meta.url).href;
+  
   return (
     <section className="py-10 px-5 bg-gray-100">
       <div className="max-w-6xl mx-auto text-center">
@@ -118,7 +112,7 @@ const StrukturOrganisasi: React.FC = () => {
                         <TransformComponent wrapperStyle={{ width: '100%', height: '600px' }} contentStyle={{ width: '1400px' }}>
                             <div className="relative mx-auto" style={{ height: '900px', width: '1400px' }}>
                                 <div className="absolute top-5 left-5 w-20 h-20 bg-white rounded-xl p-1 shadow-lg flex items-center justify-center">
-                                    <img src={logo} alt="Logo Cakung Barat" className="w-full h-full object-contain" />
+                                    <img src={logoImg} alt="Logo Cakung Barat" className="w-full h-full object-contain" />
                                 </div>
                                 <Lines />
                                 {members.map(member => (

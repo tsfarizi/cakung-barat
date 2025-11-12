@@ -4,7 +4,6 @@ import Home from './pages/Home';
 import Profil from './pages/Profil';
 import Pelayanan from './pages/Pelayanan';
 import Postingan from './pages/Postingan';
-import Galeri from './pages/Galeri';
 import { PageHeaderProvider } from './contexts/PageHeaderContext';
 
 function App() {
@@ -17,7 +16,6 @@ function App() {
             <Route path="/profil" element={<Profil />} />
             <Route path="/pelayanan" element={<Pelayanan />} />
             <Route path="/postingan" element={<Postingan />} />
-            <Route path="/galeri" element={<Galeri />} />
           </Route>
         </Routes>
       </PageHeaderProvider>

@@ -1,5 +1,4 @@
 import React from 'react';
-import heroBg from '../assets/img/hero-bg.jpg';
 
 interface PageHeaderProps {
   title: string;
@@ -7,6 +6,9 @@ interface PageHeaderProps {
 }
 
 const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle }) => {
+  // Import hero background image
+  const heroBg = new URL('/hero-bg.jpg', import.meta.url).href;
+  
   const heroStyle = {
     backgroundImage: `linear-gradient(rgba(44,90,160,.6),rgba(44,90,160,.6)),url(${heroBg})`,
     backgroundPosition: 'center',

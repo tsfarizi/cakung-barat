@@ -2,7 +2,7 @@ export interface Post {
   id: string;
   img: string;
   category: string;
-  date: string; // format: YYYY-MM-DD
+  date: string; 
   title: string;
   excerpt: string;
 }

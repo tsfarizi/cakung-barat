@@ -1,11 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import PostCard from '../components/PostCard';
+import PostDetailModal from '../components/PostDetailModal';
 import { usePageHeader } from '../contexts/PageHeaderContext';
-import { getLatestPosts } from '../data/posts';
+import { getLatestPosts, getAllPosts } from '../data/posts';
 
 const Home: React.FC = () => {
   const { setHeader } = usePageHeader();
   const [isLoaded, setIsLoaded] = useState(false);
+
+  // State untuk modal dan detail postingan
+  const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     setHeader(
@@ -22,16 +27,55 @@ const Home: React.FC = () => {
   }, [setHeader]);
 
   const latestPosts = getLatestPosts(3);
+  // Get all posts to find the selected post for modal
+  const allPosts = getAllPosts();
 
   // Fungsi untuk menangani klik pada postingan di home
   const handlePostClick = (id: string) => {
-    // Update hash di URL dalam format yang diminta
-    window.location.hash = `#/post${id}`;
+    setSelectedPostId(id);
+    setIsModalOpen(true);
   };
+
+  // Fungsi untuk menutup modal
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedPostId(null);
+    // Hapus hash dari URL saat modal ditutup
+    window.history.pushState(null, '', window.location.pathname);
+  };
+
+  // Fungsi untuk menangani perubahan hash URL
+  const handleHashChange = useCallback(() => {
+    const hash = window.location.hash.substring(1); // hapus karakter '#'
+    if (hash.startsWith('/post')) {
+      const postId = hash.replace('/post', '');
+      if (postId) {
+        setSelectedPostId(postId);
+        setIsModalOpen(true);
+      }
+    }
+  }, []);
+
+  // Menangani perubahan hash URL
+  useEffect(() => {
+    // Tangani hash saat halaman pertama kali dimuat
+    handleHashChange();
+
+    // Tambahkan event listener untuk perubahan hash
+    window.addEventListener('hashchange', handleHashChange);
+
+    // Bersihkan event listener saat komponen di-unmount
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange);
+    };
+  }, [handleHashChange]);
+
+  // Dapatkan postingan yang dipilih berdasarkan ID
+  const selectedPost = selectedPostId ? allPosts.find(post => post.id === selectedPostId) : null;
 
   return (
     <>
-      <section className="py-16 px-5 bg-gradient-to-br from-blue-50 to-indigo-50">
+      <section className="py-16 px-5 bg-linear-to-br from-blue-50 to-indigo-50">
         <div className="w-9/10 max-w-6xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start bg-white rounded-2xl p-10 shadow-xl hover:shadow-2xl transition-all duration-500 border border-gray-100 transform hover:-translate-y-1">
             <div className="text-center lg:text-left">
@@ -48,7 +92,7 @@ const Home: React.FC = () => {
               </p>
             </div>
             <div className="text-center lg:text-left">
-              <div className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl p-6 mb-6 shadow-lg">
+              <div className="bg-linear-to-r from-blue-500 to-indigo-600 text-white rounded-xl p-6 mb-6 shadow-lg">
                 <h3 className="font-bold text-lg mb-2">Komitmen Kami</h3>
                 <p className="text-blue-100">
                   Kami berkomitmen untuk terus memberikan pelayanan terbaik kepada masyarakat,
@@ -58,10 +102,12 @@ const Home: React.FC = () => {
                 </p>
               </div>
               <a
-                href="/profil"
-                className="flex items-center justify-center lg:justify-start bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white font-bold py-4 px-8 rounded-xl transition-all duration-300 shadow-lg hover:shadow-2xl transform hover:-translate-y-0.5"
+                href="/#/profil"
+                className="flex items-center justify-center lg:justify-start bg-linear-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white font-bold py-4 px-8 rounded-xl transition-all duration-300 shadow-lg hover:shadow-2xl transform hover:-translate-y-0.5"
               >
-                <span className="text-lg">Lihat Profil Lengkap</span>
+                <span className="text-lg">Lihat Profil L
+                  
+                  engkap</span>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-6 w-6 ml-2 transition-transform duration-300 group-hover:translate-x-1"
@@ -76,11 +122,11 @@ const Home: React.FC = () => {
         </div>
       </section>
 
-      <section className="py-20 px-5 bg-gradient-to-b from-white to-blue-50">
+      <section className="py-20 px-5 bg-linear-to-b from-white to-blue-50">
         <div className="w-9/10 max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-800 mb-4">Postingan Terbaru</h2>
-            <div className="w-24 h-1 bg-gradient-to-r from-blue-500 to-indigo-600 mx-auto rounded-full"></div>
+            <div className="w-24 h-1 bg-linear-to-r from-blue-500 to-indigo-600 mx-auto rounded-full"></div>
             <p className="text-gray-600 mt-4 max-w-2xl mx-auto">
               Temukan informasi terkini seputar kegiatan, pengumuman, dan berita dari Kelurahan Cakung Barat
             </p>
@@ -106,11 +152,11 @@ const Home: React.FC = () => {
         </div>
       </section>
 
-      <section className="py-20 px-5 bg-gradient-to-b from-blue-50 to-white">
+      <section className="py-20 px-5 bg-linear-to-b from-blue-50 to-white">
         <div className="w-9/10 max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-800 mb-4">Peta Wilayah & Kontak</h2>
-            <div className="w-24 h-1 bg-gradient-to-r from-blue-500 to-indigo-600 mx-auto rounded-full"></div>
+            <div className="w-24 h-1 bg-linear-to-r from-blue-500 to-indigo-600 mx-auto rounded-full"></div>
             <p className="text-gray-600 mt-4 max-w-2xl mx-auto">
               Temukan lokasi kami dan hubungi kami melalui berbagai channel komunikasi
             </p>
@@ -164,7 +210,7 @@ const Home: React.FC = () => {
                     <span className="text-red-500">Tutup</span>
                   </div>
                 </div>
-                <div className="mt-4 p-3 rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200">
+                <div className="mt-4 p-3 rounded-lg bg-linear-to-r from-blue-50 to-indigo-50 border border-blue-200">
                   <div className="text-sm text-gray-700">
                     <span className="font-medium">Status Saat Ini: </span>
                     <span id="current-status" className={new Date().getHours() >= 7 && new Date().getHours() < 17 && [1,2,3,4,5].includes(new Date().getDay()) && !(new Date().getHours() >= 12 && new Date().getHours() < 13) ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}>
@@ -189,17 +235,17 @@ const Home: React.FC = () => {
                 <div className="font-bold text-xl mb-4 text-gray-800">Ikuti Kami</div>
                 <div className="flex flex-wrap gap-4">
                   <a href="https://www.instagram.com/kelurahan_cakungbarat?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="transform transition-transform duration-300 hover:scale-110">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center shadow-md">
+                    <div className="w-12 h-12 rounded-full bg-linear-to-r from-purple-500 to-pink-500 flex items-center justify-center shadow-md">
                       <i className="fab fa-instagram text-white text-xl"></i>
                     </div>
                   </a>
                   <a href="https://wa.me/6285710897490" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" className="transform transition-transform duration-300 hover:scale-110">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-r from-green-500 to-green-600 flex items-center justify-center shadow-md">
+                    <div className="w-12 h-12 rounded-full bg-linear-to-r from-green-500 to-green-600 flex items-center justify-center shadow-md">
                       <i className="fab fa-whatsapp text-white text-xl"></i>
                     </div>
                   </a>
                   <a href="https://l.instagram.com/?u=https%3A%2F%2Fwww.youtube.com%2F%40kelurahancakungbarat7738%3Ffbclid%3DPAZXh0bgNhZW0CMTEAc3J0YwZhcHBfaWQMMjU2MjgxMDQwNTU4AAGnG-GCpqzlV_POALuJoHZtRdICVKI1__dqzJcQ3VWodahJl0uwt_8l6VO4CYo_aem_UQycjqOD4_P0fsPX76Sb6Q&e=AT0RKrb0tWnJ9PCpuV11dV1gkpXp6_1KEBmmO0joB-bbVbMoSgn48R7zKpe6UebF7SAfeN8Xxwne29HDqy_cFxVmzyerICNEahE0NESx-g" target="_blank" rel="noopener noreferrer" aria-label="YouTube" className="transform transition-transform duration-300 hover:scale-110">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-r from-red-600 to-red-700 flex items-center justify-center shadow-md">
+                    <div className="w-12 h-12 rounded-full bg-linear-to-r from-red-600 to-red-700 flex items-center justify-center shadow-md">
                       <i className="fab fa-youtube text-white text-xl"></i>
                     </div>
                   </a>
@@ -208,7 +254,7 @@ const Home: React.FC = () => {
             </div>
           </div>
 
-          <div className="mt-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl p-6 text-white">
+          <div className="mt-8 bg-linear-to-r from-blue-500 to-indigo-600 rounded-xl p-6 text-white">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="text-center">
                 <div className="text-3xl font-bold">5.2 km²</div>
@@ -226,6 +272,15 @@ const Home: React.FC = () => {
           </div>
         </div>
       </section>
+
+      {/* Modal Detail Postingan */}
+      {selectedPost && isModalOpen && (
+        <PostDetailModal
+          post={selectedPost}
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+        />
+      )}
     </>
   );
 };
