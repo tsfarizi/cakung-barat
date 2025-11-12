@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import PostCard from '../components/PostCard';
 import { usePageHeader } from '../contexts/PageHeaderContext';
+import { getLatestPosts } from '../data/posts';
 
 const Home: React.FC = () => {
   const { setHeader } = usePageHeader();
@@ -11,42 +12,26 @@ const Home: React.FC = () => {
       'Selamat Datang di Kelurahan Cakung Barat',
       'Kelurahan Cakung Barat adalah bagian dari Kecamatan Cakung, Kota Jakarta Timur. Kami berkomitmen untuk memberikan pelayanan terbaik kepada masyarakat.'
     );
-    
+
     // Trigger the animation after a short delay to ensure everything is rendered
     const timer = setTimeout(() => {
       setIsLoaded(true);
     }, 100);
-    
+
     return () => clearTimeout(timer);
   }, [setHeader]);
 
-  const posts = [
-    {
-      img: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&q=60',
-      category: 'Penghargaan',
-      date: '10 Nov 2025',
-      title: 'Kelurahan Cakung Barat Meraih Penghargaan Pelayanan Publik Terbaik 2024',
-      excerpt: 'Atas komitmen dalam memberikan pelayanan prima, Kelurahan Cakung Barat dianugerahi penghargaan "Kelurahan Terbaik" oleh Pemerintah Provinsi DKI Jakarta.'
-    },
-    {
-      img: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=800&q=60',
-      category: 'Pengumuman',
-      date: '05 Nov 2025',
-      title: 'Layanan Administrasi Kependudukan Kini Sepenuhnya Online via JAKEVO',
-      excerpt: 'Mulai 1 Februari 2025, semua pengajuan surat dan layanan administrasi dialihkan ke platform online JAKEVO untuk kemudahan dan kecepatan.'
-    },
-    {
-      img: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=800&q=60',
-      category: 'Kegiatan',
-      date: '01 Nov 2025',
-      title: 'Kerja Bakti Massal di Seluruh RW: Menjaga Kebersihan Lingkungan Bersama',
-      excerpt: 'Partisipasi aktif warga dalam kerja bakti serentak pada 15 Februari 2025 sangat diharapkan untuk mewujudkan lingkungan yang bersih dan sehat.'
-    }
-  ];
+  const latestPosts = getLatestPosts(3);
+
+  // Fungsi untuk menangani klik pada postingan di home
+  const handlePostClick = (id: string) => {
+    // Update hash di URL dalam format yang diminta
+    window.location.hash = `#/post${id}`;
+  };
 
   return (
     <>
-      <section className="py-16 px-5 bg-linear-to-br from-blue-50 to-indigo-50">
+      <section className="py-16 px-5 bg-gradient-to-br from-blue-50 to-indigo-50">
         <div className="w-9/10 max-w-6xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start bg-white rounded-2xl p-10 shadow-xl hover:shadow-2xl transition-all duration-500 border border-gray-100 transform hover:-translate-y-1">
             <div className="text-center lg:text-left">
@@ -55,32 +40,32 @@ const Home: React.FC = () => {
               </div>
               <h2 className="text-3xl font-bold mb-6 text-gray-800">Tentang Kelurahan Cakung Barat</h2>
               <p className="text-lg text-gray-700 leading-relaxed">
-                Kelurahan Cakung Barat merupakan salah satu kelurahan di Kecamatan Cakung, 
-                Kota Administrasi Jakarta Timur. Wilayah kami dikenal dengan masyarakatnya 
-                yang gotong royong dan kompak dalam membangun lingkungan yang harmonis dan sejahtera. 
-                Dengan luas wilayah sekitar 5,2 km², Cakung Barat memiliki potensi yang besar dalam 
+                Kelurahan Cakung Barat merupakan salah satu kelurahan di Kecamatan Cakung,
+                Kota Administrasi Jakarta Timur. Wilayah kami dikenal dengan masyarakatnya
+                yang gotong royong dan kompak dalam membangun lingkungan yang harmonis dan sejahtera.
+                Dengan luas wilayah sekitar 5,2 km², Cakung Barat memiliki potensi yang besar dalam
                 pengembangan berbagai aspek kehidupan masyarakat.
               </p>
             </div>
             <div className="text-center lg:text-left">
-              <div className="bg-linear-to-r from-blue-500 to-indigo-600 text-white rounded-xl p-6 mb-6 shadow-lg">
+              <div className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl p-6 mb-6 shadow-lg">
                 <h3 className="font-bold text-lg mb-2">Komitmen Kami</h3>
                 <p className="text-blue-100">
-                  Kami berkomitmen untuk terus memberikan pelayanan terbaik kepada masyarakat, 
-                  memfasilitasi berbagai kebutuhan administrasi, serta menjaga keamanan dan ketertiban 
-                  di wilayah kami. Melalui inovasi dan teknologi, kami berusaha mempermudah akses 
+                  Kami berkomitmen untuk terus memberikan pelayanan terbaik kepada masyarakat,
+                  memfasilitasi berbagai kebutuhan administrasi, serta menjaga keamanan dan ketertiban
+                  di wilayah kami. Melalui inovasi dan teknologi, kami berusaha mempermudah akses
                   pelayanan publik bagi seluruh warga Cakung Barat.
                 </p>
               </div>
-              <a 
+              <a
                 href="/profil"
-                className="flex items-center justify-center lg:justify-start bg-linear-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white font-bold py-4 px-8 rounded-xl transition-all duration-300 shadow-lg hover:shadow-2xl transform hover:-translate-y-0.5"
+                className="flex items-center justify-center lg:justify-start bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white font-bold py-4 px-8 rounded-xl transition-all duration-300 shadow-lg hover:shadow-2xl transform hover:-translate-y-0.5"
               >
                 <span className="text-lg">Lihat Profil Lengkap</span>
-                <svg 
-                  xmlns="http://www.w3.org/2000/svg" 
-                  className="h-6 w-6 ml-2 transition-transform duration-300 group-hover:translate-x-1" 
-                  viewBox="0 0 20 20" 
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6 ml-2 transition-transform duration-300 group-hover:translate-x-1"
+                  viewBox="0 0 20 20"
                   fill="currentColor"
                 >
                   <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
@@ -91,21 +76,21 @@ const Home: React.FC = () => {
         </div>
       </section>
 
-      <section className="py-20 px-5 bg-linear-to-b from-white to-blue-50">
+      <section className="py-20 px-5 bg-gradient-to-b from-white to-blue-50">
         <div className="w-9/10 max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-800 mb-4">Postingan Terbaru</h2>
-            <div className="w-24 h-1 bg-linear-to-r from-blue-500 to-indigo-600 mx-auto rounded-full"></div>
+            <div className="w-24 h-1 bg-gradient-to-r from-blue-500 to-indigo-600 mx-auto rounded-full"></div>
             <p className="text-gray-600 mt-4 max-w-2xl mx-auto">
               Temukan informasi terkini seputar kegiatan, pengumuman, dan berita dari Kelurahan Cakung Barat
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-10">
-            {posts.map((post, index) => (
-              <div 
-                key={index} 
+            {latestPosts.map((post, index) => (
+              <div
+                key={post.id}
                 className="transform transition-all duration-700 hover:-translate-y-3"
-                style={{ 
+                style={{
                   opacity: isLoaded ? 1 : 0,
                   transform: isLoaded ? 'translateX(0)' : 'translateX(-20px)',
                   transitionDelay: `${index * 100}ms`,
@@ -114,25 +99,25 @@ const Home: React.FC = () => {
                   transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)'
                 }}
               >
-                <PostCard post={post} />
+                <PostCard post={post} onPostClick={handlePostClick} />
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="py-20 px-5 bg-linear-to-b from-blue-50 to-white">
+      <section className="py-20 px-5 bg-gradient-to-b from-blue-50 to-white">
         <div className="w-9/10 max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-800 mb-4">Peta Wilayah & Kontak</h2>
-            <div className="w-24 h-1 bg-linear-to-r from-blue-500 to-indigo-600 mx-auto rounded-full"></div>
+            <div className="w-24 h-1 bg-gradient-to-r from-blue-500 to-indigo-600 mx-auto rounded-full"></div>
             <p className="text-gray-600 mt-4 max-w-2xl mx-auto">
               Temukan lokasi kami dan hubungi kami melalui berbagai channel komunikasi
             </p>
           </div>
-          <div 
+          <div
             className="grid md:grid-cols-2 gap-8"
-            style={{ 
+            style={{
               opacity: isLoaded ? 1 : 0,
               transform: isLoaded ? 'translateY(0)' : 'translateY(20px)',
               transition: 'opacity 700ms ease, transform 700ms ease',
@@ -179,7 +164,7 @@ const Home: React.FC = () => {
                     <span className="text-red-500">Tutup</span>
                   </div>
                 </div>
-                <div className="mt-4 p-3 rounded-lg bg-linear-to-r from-blue-50 to-indigo-50 border border-blue-200">
+                <div className="mt-4 p-3 rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200">
                   <div className="text-sm text-gray-700">
                     <span className="font-medium">Status Saat Ini: </span>
                     <span id="current-status" className={new Date().getHours() >= 7 && new Date().getHours() < 17 && [1,2,3,4,5].includes(new Date().getDay()) && !(new Date().getHours() >= 12 && new Date().getHours() < 13) ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}>
@@ -204,17 +189,17 @@ const Home: React.FC = () => {
                 <div className="font-bold text-xl mb-4 text-gray-800">Ikuti Kami</div>
                 <div className="flex flex-wrap gap-4">
                   <a href="https://www.instagram.com/kelurahan_cakungbarat?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="transform transition-transform duration-300 hover:scale-110">
-                    <div className="w-12 h-12 rounded-full bg-linear-to-r from-purple-500 to-pink-500 flex items-center justify-center shadow-md">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center shadow-md">
                       <i className="fab fa-instagram text-white text-xl"></i>
                     </div>
                   </a>
                   <a href="https://wa.me/6285710897490" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" className="transform transition-transform duration-300 hover:scale-110">
-                    <div className="w-12 h-12 rounded-full bg-linear-to-r from-green-500 to-green-600 flex items-center justify-center shadow-md">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-r from-green-500 to-green-600 flex items-center justify-center shadow-md">
                       <i className="fab fa-whatsapp text-white text-xl"></i>
                     </div>
                   </a>
                   <a href="https://l.instagram.com/?u=https%3A%2F%2Fwww.youtube.com%2F%40kelurahancakungbarat7738%3Ffbclid%3DPAZXh0bgNhZW0CMTEAc3J0YwZhcHBfaWQMMjU2MjgxMDQwNTU4AAGnG-GCpqzlV_POALuJoHZtRdICVKI1__dqzJcQ3VWodahJl0uwt_8l6VO4CYo_aem_UQycjqOD4_P0fsPX76Sb6Q&e=AT0RKrb0tWnJ9PCpuV11dV1gkpXp6_1KEBmmO0joB-bbVbMoSgn48R7zKpe6UebF7SAfeN8Xxwne29HDqy_cFxVmzyerICNEahE0NESx-g" target="_blank" rel="noopener noreferrer" aria-label="YouTube" className="transform transition-transform duration-300 hover:scale-110">
-                    <div className="w-12 h-12 rounded-full bg-linear-to-r from-red-600 to-red-700 flex items-center justify-center shadow-md">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-r from-red-600 to-red-700 flex items-center justify-center shadow-md">
                       <i className="fab fa-youtube text-white text-xl"></i>
                     </div>
                   </a>
@@ -222,8 +207,8 @@ const Home: React.FC = () => {
               </div>
             </div>
           </div>
-          
-          <div className="mt-8 bg-linear-to-r from-blue-500 to-indigo-600 rounded-xl p-6 text-white">
+
+          <div className="mt-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl p-6 text-white">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="text-center">
                 <div className="text-3xl font-bold">5.2 km²</div>

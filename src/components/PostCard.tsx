@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   Card,
@@ -9,6 +8,7 @@ import {
 import { Button } from "@/components/ui/button";
 
 interface Post {
+  id: string;
   img: string;
   category: string;
   date: string;
@@ -18,9 +18,18 @@ interface Post {
 
 interface PostCardProps {
   post: Post;
+  onPostClick?: (id: string) => void;
 }
 
-const PostCard: React.FC<PostCardProps> = ({ post }) => {
+const PostCard: React.FC<PostCardProps> = ({ post, onPostClick }) => {
+  const handleClick = () => {
+    if (onPostClick) {
+      onPostClick(post.id);
+      // Update hash di URL dalam format yang diminta
+      window.location.hash = `#/post${post.id}`;
+    }
+  };
+
   return (
     <Card className="overflow-hidden transition-all duration-500 hover:-translate-y-2 hover:shadow-xl border border-gray-200 rounded-xl h-full flex flex-col">
       <div className="relative">
@@ -36,12 +45,16 @@ const PostCard: React.FC<PostCardProps> = ({ post }) => {
         <CardTitle className="text-xl font-bold text-gray-800 mb-3 line-clamp-2">{post.title}</CardTitle>
         <CardDescription className="text-gray-600 mb-4 grow">{post.excerpt}</CardDescription>
         <CardFooter className="p-0 pt-4 mt-auto">
-          <Button variant="link" className="p-0 font-semibold text-blue-600 hover:underline hover:text-blue-800 transition-colors">
-            Baca Selengkapnya 
-            <svg 
-              xmlns="http://www.w3.org/2000/svg" 
-              className="h-4 w-4 ml-1 transition-transform duration-300 group-hover:translate-x-1" 
-              viewBox="0 0 20 20" 
+          <Button 
+            variant="link" 
+            className="p-0 font-semibold text-blue-600 hover:underline hover:text-blue-800 transition-colors"
+            onClick={handleClick}
+          >
+            Baca Selengkapnya
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-4 w-4 ml-1 transition-transform duration-300 group-hover:translate-x-1"
+              viewBox="0 0 20 20"
               fill="currentColor"
             >
               <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
