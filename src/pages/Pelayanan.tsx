@@ -20,14 +20,6 @@ const Pelayanan: React.FC = () => {
 
   const jakevoURL = "https://jakevo.jakarta.go.id";
 
-  const layoutPattern = [
-    { colSpan: 3 }, // row 1, item 1
-    { colSpan: 3 }, // row 1, item 2
-    { colSpan: 2 }, // row 2, item 1
-    { colSpan: 2 }, // row 2, item 2
-    { colSpan: 2 }, // row 2, item 3
-  ];
-
   return (
     <section className="py-16 px-5 bg-gray-50">
       <div className="max-w-6xl mx-auto">
