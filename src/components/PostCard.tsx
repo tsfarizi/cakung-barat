@@ -25,8 +25,6 @@ const PostCard: React.FC<PostCardProps> = ({ post, onPostClick }) => {
   const handleClick = () => {
     if (onPostClick) {
       onPostClick(post.id);
-      // Update hash di URL dalam format yang diminta
-      window.location.hash = `#/post${post.id}`;
     }
   };
 

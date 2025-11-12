@@ -59,8 +59,6 @@ const Postingan: React.FC = () => {
   const handlePostClick = (id: string) => {
     setSelectedPostId(id);
     setIsModalOpen(true);
-    // Update hash di URL dalam format yang diminta
-    window.location.hash = `#/post${id}`;
   };
 
   // Fungsi untuk menutup modal
