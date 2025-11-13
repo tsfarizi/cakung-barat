@@ -10,12 +10,12 @@
     "preview": "vite preview",
     "deploy": "gh-pages -d dist"
   },
-
   "homepage": "https://github.com/tsfarizi/cakung-barat",
-
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.4",
     "@tailwindcss/vite": "^4.1.17",
+    "@types/axios": "^0.9.36",
+    "axios": "^1.13.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "framer-motion": "^12.23.24",

@@ -2,7 +2,8 @@ import React, { useEffect, useState, useCallback } from 'react';
 import PostCard from '../components/PostCard';
 import PostDetailModal from '../components/PostDetailModal';
 import { usePageHeader } from '../contexts/PageHeaderContext';
-import { getLatestPosts, getAllPosts } from '../data/posts';
+import { apiService } from '../api';
+import type { Post } from '../api/dto/posting.dto';
 
 const Home: React.FC = () => {
   const { setHeader } = usePageHeader();
@@ -26,9 +27,43 @@ const Home: React.FC = () => {
     return () => clearTimeout(timer);
   }, [setHeader]);
 
-  const latestPosts = getLatestPosts(3);
-  // Get all posts to find the selected post for modal
-  const allPosts = getAllPosts();
+  // State to store posts
+  const [allPosts, setAllPosts] = useState<Post[]>([]);
+  const [latestPosts, setLatestPosts] = useState<Post[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch posts from API
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        setLoading(true);
+        const fetchedPosts = await apiService.getAllPostings();
+        setAllPosts(fetchedPosts);
+        
+        // Sort by date (newest first) and take the latest 3
+        const sortedPosts = [...fetchedPosts]
+          .sort((a, b) => {
+            // If created_at exists, use that; otherwise, use date
+            const dateA = a.created_at ? new Date(a.created_at) : a.date ? new Date(a.date) : new Date(0);
+            const dateB = b.created_at ? new Date(b.created_at) : b.date ? new Date(b.date) : new Date(0);
+            return dateB.getTime() - dateA.getTime(); // Descending order (newest first)
+          })
+          .slice(0, 3);
+        
+        setLatestPosts(sortedPosts);
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching posts:', err);
+        setError('Gagal memuat postingan terbaru. Silakan coba lagi nanti.');
+        setLatestPosts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPosts();
+  }, []);
 
   // Fungsi untuk menangani klik pada postingan di home
   const handlePostClick = (id: string) => {
@@ -70,8 +105,33 @@ const Home: React.FC = () => {
     };
   }, [handleHashChange]);
 
-  // Dapatkan postingan yang dipilih berdasarkan ID
+  // Function to convert API post to the format expected by PostCard
+  const convertApiPostToCardPost = (apiPost: Post) => {
+    // If img is an array of UUIDs, create a placeholder URL or use the first image
+    const img = apiPost.img && apiPost.img.length > 0 
+      ? `https://via.placeholder.com/400x200?text=Image+${apiPost.img[0]}` 
+      : 'https://via.placeholder.com/400x200?text=No+Image';
+    
+    // Ensure date is a string
+    const date = apiPost.date || formatDate(apiPost.created_at) || 'Tanggal tidak tersedia';
+    
+    return {
+      ...apiPost,
+      img,
+      date
+    };
+  };
+
+  // Function to format date
+  const formatDate = (dateString: string | null | undefined) => {
+    if (!dateString) return '';
+    const options: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short', year: 'numeric' };
+    return new Date(dateString).toLocaleDateString('id-ID', options);
+  };
+
+  // Get the selected post for modal
   const selectedPost = selectedPostId ? allPosts.find(post => post.id === selectedPostId) : null;
+  const selectedPostForModal = selectedPost ? convertApiPostToCardPost(selectedPost) : null;
 
   return (
     <>
@@ -132,22 +192,39 @@ const Home: React.FC = () => {
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-10">
-            {latestPosts.map((post, index) => (
-              <div
-                key={post.id}
-                className="transform transition-all duration-700 hover:-translate-y-3"
-                style={{
-                  opacity: isLoaded ? 1 : 0,
-                  transform: isLoaded ? 'translateX(0)' : 'translateX(-20px)',
-                  transitionDelay: `${index * 100}ms`,
-                  transitionProperty: 'opacity, transform',
-                  transitionDuration: '700ms',
-                  transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)'
-                }}
-              >
-                <PostCard post={post} onPostClick={handlePostClick} />
+            {loading ? (
+              <div className="col-span-full text-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+                <p className="mt-4 text-gray-600">Memuat postingan terbaru...</p>
               </div>
-            ))}
+            ) : error ? (
+              <div className="col-span-full text-center py-12">
+                <h3 className="text-lg font-medium text-gray-900">Terjadi Kesalahan</h3>
+                <p className="text-gray-500 mt-2">{error}</p>
+              </div>
+            ) : latestPosts.length > 0 ? (
+              latestPosts.map((post, index) => (
+                <div
+                  key={post.id}
+                  className="transform transition-all duration-700 hover:-translate-y-3"
+                  style={{
+                    opacity: isLoaded ? 1 : 0,
+                    transform: isLoaded ? 'translateX(0)' : 'translateX(-20px)',
+                    transitionDelay: `${index * 100}ms`,
+                    transitionProperty: 'opacity, transform',
+                    transitionDuration: '700ms',
+                    transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)'
+                  }}
+                >
+                  <PostCard post={convertApiPostToCardPost(post)} onPostClick={handlePostClick} />
+                </div>
+              ))
+            ) : (
+              <div className="col-span-full text-center py-12">
+                <h3 className="text-lg font-medium text-gray-900">Belum ada postingan terbaru</h3>
+                <p className="text-gray-500 mt-2">Postingan terbaru akan muncul di sini ketika tersedia</p>
+              </div>
+            )}
           </div>
         </div>
       </section>
@@ -274,9 +351,9 @@ const Home: React.FC = () => {
       </section>
 
       {/* Modal Detail Postingan */}
-      {selectedPost && isModalOpen && (
+      {selectedPostForModal && isModalOpen && (
         <PostDetailModal
-          post={selectedPost}
+          post={selectedPostForModal}
           isOpen={isModalOpen}
           onClose={handleCloseModal}
         />

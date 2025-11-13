@@ -5,7 +5,8 @@ import PostDetailModal from '../components/PostDetailModal';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import { Search, Filter, Calendar } from 'lucide-react';
-import { getAllPosts } from '../data/posts';
+import { apiService } from '../api';
+import type { Post } from '../api/dto/posting.dto';
 
 const Postingan: React.FC = () => {
   const { setHeader } = usePageHeader();
@@ -17,20 +18,42 @@ const Postingan: React.FC = () => {
     );
   }, [setHeader]);
 
-  const posts = getAllPosts();
-
   // State untuk search, sorting, filtering dan modal
   const [searchTerm, setSearchTerm] = useState('');
   const [sortOption, setSortOption] = useState('newest');
   const [filterCategory, setFilterCategory] = useState('all');
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch data dari API
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        setLoading(true);
+        const fetchedPosts = await apiService.getAllPostings();
+        setPosts(fetchedPosts);
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching posts:', err);
+        setError('Gagal memuat postingan. Silakan coba lagi nanti.');
+        setPosts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPosts();
+  }, []);
 
   // Dapatkan kategori unik untuk filtering
   const categories = ['all', ...new Set(posts.map(post => post.category))];
 
   // Fungsi untuk memformat tanggal
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString: string | null | undefined) => {
+    if (!dateString) return '';
     const options: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short', year: 'numeric' };
     return new Date(dateString).toLocaleDateString('id-ID', options);
   };
@@ -45,9 +68,14 @@ const Postingan: React.FC = () => {
     })
     .sort((a, b) => {
       if (sortOption === 'newest') {
-        return new Date(b.date).getTime() - new Date(a.date).getTime();
+        // Jika created_at tersedia, gunakan itu, jika tidak gunakan date
+        const dateA = a.created_at ? new Date(a.created_at) : a.date ? new Date(a.date) : new Date(0);
+        const dateB = b.created_at ? new Date(b.created_at) : b.date ? new Date(b.date) : new Date(0);
+        return dateB.getTime() - dateA.getTime();
       } else {
-        return new Date(a.date).getTime() - new Date(b.date).getTime();
+        const dateA = a.created_at ? new Date(a.created_at) : a.date ? new Date(a.date) : new Date(0);
+        const dateB = b.created_at ? new Date(b.created_at) : b.date ? new Date(b.date) : new Date(0);
+        return dateA.getTime() - dateB.getTime();
       }
     })
     .map(post => ({
@@ -97,6 +125,25 @@ const Postingan: React.FC = () => {
 
   // Dapatkan postingan yang dipilih berdasarkan ID
   const selectedPost = selectedPostId ? posts.find(post => post.id === selectedPostId) : null;
+
+  // Fungsi untuk mengonversi format API ke format yang diharapkan oleh PostCard
+  const convertApiPostToCardPost = (apiPost: Post) => {
+    // Jika img adalah array UUID, kita buat URL placeholder atau nanti bisa diisi dengan URL asli
+    const img = apiPost.img && apiPost.img.length > 0 
+      ? `https://via.placeholder.com/400x200?text=Image+${apiPost.img[0]}` 
+      : 'https://via.placeholder.com/400x200?text=No+Image';
+    
+    // Ensure date is a string (convert null to empty string or format date)
+    const date = apiPost.date || formatDate(apiPost.created_at) || 'Tanggal tidak tersedia';
+    
+    return {
+      ...apiPost,
+      img,
+      date
+    };
+  };
+
+  const selectedPostForModal = selectedPost ? convertApiPostToCardPost(selectedPost) : null;
 
   return (
     <section className="py-16 px-5 bg-gray-50">
@@ -166,23 +213,46 @@ const Postingan: React.FC = () => {
         </div>
 
         {/* Posts Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredAndSortedPosts.length > 0 ? (
-            filteredAndSortedPosts.map((post) => (
-              <PostCard key={post.id} post={post} onPostClick={handlePostClick} />
-            ))
-          ) : (
+        {loading ? (
+          <div className="flex justify-center items-center h-64">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+              <p className="mt-4 text-gray-600">Memuat postingan...</p>
+            </div>
+          </div>
+        ) : error ? (
+          <div className="col-span-full text-center py-12">
+            <h3 className="text-lg font-medium text-gray-900">Terjadi Kesalahan</h3>
+            <p className="text-gray-500 mt-2">{error}</p>
+          </div>
+        ) : posts.length === 0 ? (
+          <div className="col-span-full text-center py-12">
+            <h3 className="text-lg font-medium text-gray-900">Belum ada postingan</h3>
+            <p className="text-gray-500 mt-2">Postingan akan muncul di sini ketika sudah tersedia</p>
+          </div>
+        ) : filteredAndSortedPosts.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {filteredAndSortedPosts.map((post) => (
+              <PostCard 
+                key={post.id} 
+                post={convertApiPostToCardPost(post)} 
+                onPostClick={handlePostClick} 
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <div className="col-span-full text-center py-12">
               <h3 className="text-lg font-medium text-gray-900">Postingan tidak ditemukan</h3>
               <p className="text-gray-500 mt-2">Coba kata kunci atau filter lainnya</p>
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Modal Detail Postingan */}
-        {selectedPost && isModalOpen && (
+        {selectedPostForModal && isModalOpen && (
           <PostDetailModal 
-            post={selectedPost} 
+            post={selectedPostForModal} 
             isOpen={isModalOpen} 
             onClose={handleCloseModal} 
           />
