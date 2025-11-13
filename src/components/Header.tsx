@@ -3,7 +3,6 @@ import { NavLink } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { motion } from 'framer-motion';
 
-// Type definition for NodeJS.Timeout to resolve TypeScript error
 declare global {
   namespace NodeJS {
     interface Timeout {
@@ -17,22 +16,18 @@ const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolling, setIsScrolling] = useState(false);
 
-  // Import logo image
   const logoImg = '/cakung-barat/logo.png';
 
-  // Handle scroll effect for trailing animation
   useEffect(() => {
     let timeoutId: number | null = null;
 
     const handleScroll = () => {
       setIsScrolling(true);
-      
-      // Clear the timeout if it exists
+
       if (timeoutId) {
         clearTimeout(timeoutId);
       }
 
-      // Set a new timeout to remove the scrolling class after 300ms delay (for trailing effect)
       timeoutId = window.setTimeout(() => {
         setIsScrolling(false);
       }, 300);
@@ -40,7 +35,6 @@ const Header: React.FC = () => {
 
     window.addEventListener('scroll', handleScroll);
 
-    // Cleanup the event listener
     return () => {
       window.removeEventListener('scroll', handleScroll);
       if (timeoutId) {

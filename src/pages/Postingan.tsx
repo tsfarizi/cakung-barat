@@ -58,7 +58,6 @@ const Postingan: React.FC = () => {
     return new Date(dateString).toLocaleDateString('id-ID', options);
   };
 
-  // Filter dan sortir postingan
   const filteredAndSortedPosts = posts
     .filter(post => {
       const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -110,12 +109,9 @@ const Postingan: React.FC = () => {
 
 
   useEffect(() => {
-
     handleHashChange();
 
-
     window.addEventListener('hashchange', handleHashChange);
-
 
     return () => {
       window.removeEventListener('hashchange', handleHashChange);

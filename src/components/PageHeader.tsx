@@ -6,7 +6,6 @@ interface PageHeaderProps {
 }
 
 const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle }) => {
-  // Import hero background image
   const heroBg = new URL('/hero-bg.jpg', import.meta.url).href;
 
   const heroStyle = {

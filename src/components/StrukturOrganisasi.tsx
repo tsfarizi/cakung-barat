@@ -86,7 +86,6 @@ const Lines: React.FC = () => {
 };
 
 const StrukturOrganisasi: React.FC = () => {
-  // Import logo image
   const logoImg = '/cakung-barat/logo.png';
   
   return (

@@ -39,10 +39,8 @@ const PostDetailModal: React.FC<PostDetailModalProps> = ({ post, isOpen, onClose
     };
   }, [isOpen, onClose]);
 
-  // Fungsi untuk menutup modal
   const handleClose = () => {
     onClose();
-    // Menghapus hash dari URL saat menutup modal
     window.history.pushState(null, '', window.location.pathname);
   };
 
@@ -72,7 +70,7 @@ const PostDetailModal: React.FC<PostDetailModalProps> = ({ post, isOpen, onClose
               y: 20
             }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            onClick={(e) => e.stopPropagation()} // Mencegah close saat meng-klik konten modal
+            onClick={(e) => e.stopPropagation()}
           >
             {/* Tombol tutup */}
             <button

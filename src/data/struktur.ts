@@ -6,7 +6,7 @@ export interface Member {
   parentId: number | null;
   x: number;
   y: number;
-  branch?: string; // Optional property for branch
+  branch?: string;
 }
 
 const orgData: Member[] = [

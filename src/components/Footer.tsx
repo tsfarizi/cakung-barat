@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 
 const Footer: React.FC = () => {
   return (
-    <motion.footer 
+    <motion.footer
       initial={{ y: 100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.6 }}

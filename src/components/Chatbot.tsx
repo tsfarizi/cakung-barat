@@ -5,7 +5,6 @@ const Chatbot: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isPulsing, setIsPulsing] = useState(true);
 
-  // Mengatur efek animasi typing
   const [botMessage, setBotMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [messageIndex, setMessageIndex] = useState(0);
@@ -16,7 +15,6 @@ const Chatbot: React.FC = () => {
     "Anda bisa bertanya tentang pelayanan administrasi, kependudukan, atau informasi terkini"
   ];
 
-  // Fungsi untuk menampilkan pesan dengan efek typing
   const displayTypingMessage = (message: string) => {
     setIsTyping(true);
     setBotMessage('');
@@ -34,7 +32,6 @@ const Chatbot: React.FC = () => {
     }, 30);
   };
 
-  // Menampilkan pesan bot saat popup dibuka
   const openChat = () => {
     setIsOpen(!isOpen);
     if (!isOpen) {

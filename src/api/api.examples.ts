@@ -1,8 +1,6 @@
-// Example usage of the API service
 import { apiService } from './api.service';
 import type { CreatePostingRequest, UpdatePostingRequest } from './dto/posting.dto';
 
-// Example: Creating a new posting
 const createNewPosting = async () => {
   const postingData: CreatePostingRequest = {
     title: 'New Post Title',
@@ -19,7 +17,6 @@ const createNewPosting = async () => {
   }
 };
 
-// Example: Updating an existing posting
 const updateExistingPosting = async (id: string) => {
   const updateData: UpdatePostingRequest = {
     title: 'Updated Title',
@@ -34,7 +31,6 @@ const updateExistingPosting = async (id: string) => {
   }
 };
 
-// Example: Getting all postings
 const getAllPostings = async () => {
   try {
     const postings = await apiService.getAllPostings();
@@ -44,7 +40,6 @@ const getAllPostings = async () => {
   }
 };
 
-// Example: Uploading an asset
 const uploadAsset = async (file: File) => {
   try {
     const asset = await apiService.uploadAsset({
@@ -58,7 +53,6 @@ const uploadAsset = async (file: File) => {
   }
 };
 
-// Example: Getting all assets
 const getAllAssets = async () => {
   try {
     const assets = await apiService.getAllAssets();

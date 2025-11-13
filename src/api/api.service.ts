@@ -12,7 +12,6 @@ class ApiService {
   private apiClient: AxiosInstance;
 
   constructor() {
-    // Get API URL from environment variable
     const apiUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8080';
     
     this.apiClient = axios.create({
@@ -24,7 +23,6 @@ class ApiService {
     });
   }
 
-  // Asset Service Methods
   async getAllAssets(): Promise<AllAssetsResponse> {
     const response = await this.apiClient.get('/api/assets');
     return response.data;
@@ -79,7 +77,6 @@ class ApiService {
     await this.apiClient.delete(`/api/assets/${id}`);
   }
 
-  // Posting Service Methods
   async getAllPostings(): Promise<Post[]> {
     const response = await this.apiClient.get('/api/postings');
     return response.data;

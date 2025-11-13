@@ -40,7 +40,6 @@ const Pelayanan: React.FC = () => {
           </Button>
         </div>
 
-        {/* PTSP Services Section with Bento Box Layout */}
         <div className="mt-16">
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold text-gray-800">Layanan PTSP (Melalui JAKEVO)</h2>
@@ -53,24 +52,22 @@ const Pelayanan: React.FC = () => {
               let currentIndex = 0;
               
               while (currentIndex < ptspServices.length) {
-                // Determine how many items in this row (3, then 2, alternating)
-                const isOddRow = Math.floor(currentIndex / 3) % 2 === 0; // First row (0) is odd for 3 items
+
+                const isOddRow = Math.floor(currentIndex / 3) % 2 === 0;
                 let itemsInRow = isOddRow ? 
                   Math.min(3, ptspServices.length - currentIndex) : 
                   Math.min(2, ptspServices.length - currentIndex);
                 
-                // If only 1 item is left, make it span the entire row
                 if (ptspServices.length - currentIndex === 1) {
                   itemsInRow = 1;
                 }
-                
-                // Create a row element
+
                 let rowClass = '';
                 if (itemsInRow === 3) {
                   rowClass = 'grid grid-cols-1 md:grid-cols-3 gap-6';
                 } else if (itemsInRow === 2) {
                   rowClass = 'grid grid-cols-1 md:grid-cols-2 gap-6';
-                } else { // itemsInRow === 1
+                } else {
                   rowClass = 'grid grid-cols-1 md:grid-cols-3 gap-6';
                 }
                 

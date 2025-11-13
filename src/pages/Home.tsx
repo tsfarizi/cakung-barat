@@ -9,7 +9,6 @@ const Home: React.FC = () => {
   const { setHeader } = usePageHeader();
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // State untuk modal dan detail postingan
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -19,7 +18,6 @@ const Home: React.FC = () => {
       'Kelurahan Cakung Barat adalah bagian dari Kecamatan Cakung, Kota Jakarta Timur. Kami berkomitmen untuk memberikan pelayanan terbaik kepada masyarakat.'
     );
 
-    // Trigger the animation after a short delay to ensure everything is rendered
     const timer = setTimeout(() => {
       setIsLoaded(true);
     }, 100);
@@ -27,13 +25,10 @@ const Home: React.FC = () => {
     return () => clearTimeout(timer);
   }, [setHeader]);
 
-  // State to store posts
   const [allPosts, setAllPosts] = useState<Post[]>([]);
   const [latestPosts, setLatestPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  // Fetch posts from API
   useEffect(() => {
     const fetchPosts = async () => {
       try {
@@ -41,13 +36,11 @@ const Home: React.FC = () => {
         const fetchedPosts = await apiService.getAllPostings();
         setAllPosts(fetchedPosts);
         
-        // Sort by date (newest first) and take the latest 3
         const sortedPosts = [...fetchedPosts]
           .sort((a, b) => {
-            // If created_at exists, use that; otherwise, use date
             const dateA = a.created_at ? new Date(a.created_at) : a.date ? new Date(a.date) : new Date(0);
             const dateB = b.created_at ? new Date(b.created_at) : b.date ? new Date(b.date) : new Date(0);
-            return dateB.getTime() - dateA.getTime(); // Descending order (newest first)
+            return dateB.getTime() - dateA.getTime();
           })
           .slice(0, 3);
         
@@ -65,23 +58,19 @@ const Home: React.FC = () => {
     fetchPosts();
   }, []);
 
-  // Fungsi untuk menangani klik pada postingan di home
   const handlePostClick = (id: string) => {
     setSelectedPostId(id);
     setIsModalOpen(true);
   };
 
-  // Fungsi untuk menutup modal
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedPostId(null);
-    // Hapus hash dari URL saat modal ditutup
     window.history.pushState(null, '', window.location.pathname);
   };
 
-  // Fungsi untuk menangani perubahan hash URL
   const handleHashChange = useCallback(() => {
-    const hash = window.location.hash.substring(1); // hapus karakter '#'
+    const hash = window.location.hash.substring(1);
     if (hash.startsWith('/post')) {
       const postId = hash.replace('/post', '');
       if (postId) {
@@ -91,28 +80,21 @@ const Home: React.FC = () => {
     }
   }, []);
 
-  // Menangani perubahan hash URL
   useEffect(() => {
-    // Tangani hash saat halaman pertama kali dimuat
     handleHashChange();
 
-    // Tambahkan event listener untuk perubahan hash
     window.addEventListener('hashchange', handleHashChange);
 
-    // Bersihkan event listener saat komponen di-unmount
     return () => {
       window.removeEventListener('hashchange', handleHashChange);
     };
   }, [handleHashChange]);
 
-  // Function to convert API post to the format expected by PostCard
   const convertApiPostToCardPost = (apiPost: Post) => {
-    // If img is an array of UUIDs, create a placeholder URL or use the first image
-    const img = apiPost.img && apiPost.img.length > 0 
-      ? `https://placehold.co/400x200?text=Image+${apiPost.img[0]}` 
+    const img = apiPost.img && apiPost.img.length > 0
+      ? `https://placehold.co/400x200?text=Image+${apiPost.img[0]}`
       : 'https://placehold.co/400x200?text=No+Image';
-    
-    // Ensure date is a string
+
     const date = apiPost.date || formatDate(apiPost.created_at) || 'Tanggal tidak tersedia';
     
     return {
@@ -122,14 +104,12 @@ const Home: React.FC = () => {
     };
   };
 
-  // Function to format date
   const formatDate = (dateString: string | null | undefined) => {
     if (!dateString) return '';
     const options: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short', year: 'numeric' };
     return new Date(dateString).toLocaleDateString('id-ID', options);
   };
 
-  // Get the selected post for modal
   const selectedPost = selectedPostId ? allPosts.find(post => post.id === selectedPostId) : null;
   const selectedPostForModal = selectedPost ? convertApiPostToCardPost(selectedPost) : null;
 
