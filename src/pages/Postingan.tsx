@@ -129,8 +129,8 @@ const Postingan: React.FC = () => {
   const convertApiPostToCardPost = (apiPost: Post) => {
 
     const img = apiPost.img && apiPost.img.length > 0 
-      ? `https://via.placeholder.com/400x200?text=Image+${apiPost.img[0]}` 
-      : 'https://via.placeholder.com/400x200?text=No+Image';
+      ? `https://placehold.co/400x200?text=Image+${apiPost.img[0]}` 
+      : 'https://placehold.co/400x200?text=No+Image';
     
 
     const date = apiPost.date || formatDate(apiPost.created_at) || 'Tanggal tidak tersedia';

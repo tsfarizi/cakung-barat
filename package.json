@@ -12,6 +12,7 @@
   },
   "homepage": "https://github.com/tsfarizi/cakung-barat",
   "dependencies": {
+    "@fortawesome/fontawesome-free": "^7.1.0",
     "@radix-ui/react-slot": "^1.2.4",
     "@tailwindcss/vite": "^4.1.17",
     "@types/axios": "^0.9.36",

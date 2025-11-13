@@ -109,8 +109,8 @@ const Home: React.FC = () => {
   const convertApiPostToCardPost = (apiPost: Post) => {
     // If img is an array of UUIDs, create a placeholder URL or use the first image
     const img = apiPost.img && apiPost.img.length > 0 
-      ? `https://via.placeholder.com/400x200?text=Image+${apiPost.img[0]}` 
-      : 'https://via.placeholder.com/400x200?text=No+Image';
+      ? `https://placehold.co/400x200?text=Image+${apiPost.img[0]}` 
+      : 'https://placehold.co/400x200?text=No+Image';
     
     // Ensure date is a string
     const date = apiPost.date || formatDate(apiPost.created_at) || 'Tanggal tidak tersedia';
