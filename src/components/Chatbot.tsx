@@ -50,7 +50,7 @@ const Chatbot: React.FC = () => {
         src="/chat-icon.png"
         alt="Chat"
         id="chat-toggle"
-        className="w-14 h-14 fixed bottom-6 right-6 cursor-pointer z-999 rounded-full bg-white shadow-lg"
+        className="w-14 h-14 fixed bottom-6 left-6 cursor-pointer z-999 rounded-full bg-white shadow-lg"
         onClick={openChat}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.95 }}
@@ -80,7 +80,7 @@ const Chatbot: React.FC = () => {
               flexDirection: 'column', 
               position: 'fixed', 
               bottom: '90px', 
-              right: '25px', 
+              left: '25px', 
               width: '320px', 
               background: '#fff', 
               borderRadius: '10px', 

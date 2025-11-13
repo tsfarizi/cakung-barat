@@ -135,7 +135,7 @@ const Home: React.FC = () => {
 
   return (
     <>
-      <section className="py-16 px-5 bg-linear-to-br from-blue-50 to-indigo-50">
+      <section className="py-16 px-5 bg-linear-to-br from-blue-50 to-indigo-50 rounded-full m-10">
         <div className="w-9/10 max-w-6xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start bg-white rounded-2xl p-10 shadow-xl hover:shadow-2xl transition-all duration-500 border border-gray-100 transform hover:-translate-y-1">
             <div className="text-center lg:text-left">

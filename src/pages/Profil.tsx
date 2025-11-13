@@ -178,32 +178,6 @@ const Profil: React.FC = () => {
                   </div>
                 </motion.div>
               </div>
-
-              {/* Interactive timeline at bottom */}
-              <div className="mt-48 bg-blue-50 rounded-2xl p-8 border border-gray-100">
-                <h3 className="text-xl font-bold text-center text-dark mb-6">Timeline Perkembangan Kelurahan</h3>
-                <div className="flex justify-between items-center relative">
-                  <div className="absolute top-1/2 left-0 right-0 h-1 bg-linear-to-r from-accent to-primary transform -translate-y-1/2"></div>
-
-                  <div className="flex flex-col items-center z-10">
-                    <div className="w-6 h-6 rounded-full bg-accent border-4 border-white shadow-lg"></div>
-                    <span className="mt-2 text-sm font-semibold text-primary">1970-an</span>
-                    <span className="text-xs text-gray-600 text-center mt-1">Awal Perkembangan</span>
-                  </div>
-
-                  <div className="flex flex-col items-center z-10">
-                    <div className="w-8 h-8 rounded-full bg-primary border-4 border-white shadow-lg"></div>
-                    <span className="mt-2 text-sm font-semibold text-primary">1981</span>
-                    <span className="text-xs text-gray-600 text-center mt-1">Perubahan Administratif</span>
-                  </div>
-
-                  <div className="flex flex-col items-center z-10">
-                    <div className="w-6 h-6 rounded-full bg-green-500 border-4 border-white shadow-lg"></div>
-                    <span className="mt-2 text-sm font-semibold text-green-500">Kini</span>
-                    <span className="text-xs text-gray-600 text-center mt-1">Perkembangan Pesat</span>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         </div>
