@@ -87,7 +87,7 @@ const Lines: React.FC = () => {
 
 const StrukturOrganisasi: React.FC = () => {
   // Import logo image
-  const logoImg = new URL('/logo.png', import.meta.url).href;
+  const logoImg = '/cakung-barat/logo.png';
   
   return (
     <section className="py-10 px-5 bg-gray-100">
@@ -112,7 +112,15 @@ const StrukturOrganisasi: React.FC = () => {
                         <TransformComponent wrapperStyle={{ width: '100%', height: '600px' }} contentStyle={{ width: '1400px' }}>
                             <div className="relative mx-auto" style={{ height: '900px', width: '1400px' }}>
                                 <div className="absolute top-5 left-5 w-20 h-20 bg-white rounded-xl p-1 shadow-lg flex items-center justify-center">
-                                    <img src={logoImg} alt="Logo Cakung Barat" className="w-full h-full object-contain" />
+                                    <img 
+                                  src={logoImg} 
+                                  alt="Logo Cakung Barat" 
+                                  className="w-full h-full object-contain" 
+                                  onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    target.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24"><rect width="24" height="24" fill="%239CCDDC"/><text x="12" y="16" font-family="Arial" font-size="14" fill="white" text-anchor="middle">CB</text></svg>';
+                                  }} 
+                                />
                                 </div>
                                 <Lines />
                                 {members.map(member => (

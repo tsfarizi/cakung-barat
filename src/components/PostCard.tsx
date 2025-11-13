@@ -1,11 +1,12 @@
 import React from 'react';
 import {
   Card,
-  CardDescription,
   CardFooter,
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface Post {
   id: string;
@@ -41,7 +42,26 @@ const PostCard: React.FC<PostCardProps> = ({ post, onPostClick }) => {
           <span>{post.date}</span>
         </div>
         <CardTitle className="text-xl font-bold text-gray-800 mb-3 line-clamp-2">{post.title}</CardTitle>
-        <CardDescription className="text-gray-600 mb-4 grow">{post.excerpt}</CardDescription>
+        <div className="text-gray-600 mb-4 grow">
+          <ReactMarkdown 
+            remarkPlugins={[remarkGfm]} 
+            components={{
+              p: (props) => <p className="mb-0" {...props} />,
+              h1: (props) => <h1 className="font-bold text-lg mb-1" {...props} />,
+              h2: (props) => <h2 className="font-bold text-md mb-1" {...props} />,
+              h3: (props) => <h3 className="font-bold text-sm mb-1" {...props} />,
+              ul: (props) => <ul className="list-disc pl-5 mb-1" {...props} />,
+              ol: (props) => <ol className="list-decimal pl-5 mb-1" {...props} />,
+              li: (props) => <li className="mb-0.5" {...props} />,
+              strong: (props) => <strong className="font-semibold" {...props} />,
+              em: (props) => <em className="italic" {...props} />,
+              code: (props) => <code className="bg-gray-100 px-1 py-0.5 rounded text-sm" {...props} />,
+              pre: (props) => <pre className="bg-gray-100 p-2 rounded mt-1 mb-1 overflow-x-auto" {...props} />,
+            }}
+          >
+            {post.excerpt}
+          </ReactMarkdown>
+        </div>
         <CardFooter className="p-0 pt-4 mt-auto">
           <Button 
             variant="link" 

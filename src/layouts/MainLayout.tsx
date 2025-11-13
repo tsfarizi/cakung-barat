@@ -17,7 +17,8 @@ const MainLayout: React.FC = () => {
         <Outlet />
       </main>
       <Footer />
-      <Chatbot />
+      {/* Chatbot component commented out until server integration is ready */}
+      {/* <Chatbot /> */}
     </div>
   );
 };

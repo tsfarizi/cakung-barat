@@ -19,7 +19,7 @@ const ServiceItem: React.FC<ServiceItemProps> = ({ number, title, description, i
     >
       <Card className="hover:shadow-lg transition-shadow duration-200 h-full border border-gray-200">
         <CardContent className="p-4 flex">
-          <div className="flex-shrink-0 mr-4">
+          <div className="shrink-0 mr-4">
             <div className="bg-primary text-primary-foreground w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold">
               {number}
             </div>

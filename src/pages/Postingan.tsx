@@ -18,7 +18,7 @@ const Postingan: React.FC = () => {
     );
   }, [setHeader]);
 
-  // State untuk search, sorting, filtering dan modal
+
   const [searchTerm, setSearchTerm] = useState('');
   const [sortOption, setSortOption] = useState('newest');
   const [filterCategory, setFilterCategory] = useState('all');
@@ -28,7 +28,7 @@ const Postingan: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch data dari API
+
   useEffect(() => {
     const fetchPosts = async () => {
       try {
@@ -48,10 +48,10 @@ const Postingan: React.FC = () => {
     fetchPosts();
   }, []);
 
-  // Dapatkan kategori unik untuk filtering
+
   const categories = ['all', ...new Set(posts.map(post => post.category))];
 
-  // Fungsi untuk memformat tanggal
+
   const formatDate = (dateString: string | null | undefined) => {
     if (!dateString) return '';
     const options: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short', year: 'numeric' };
@@ -68,7 +68,6 @@ const Postingan: React.FC = () => {
     })
     .sort((a, b) => {
       if (sortOption === 'newest') {
-        // Jika created_at tersedia, gunakan itu, jika tidak gunakan date
         const dateA = a.created_at ? new Date(a.created_at) : a.date ? new Date(a.date) : new Date(0);
         const dateB = b.created_at ? new Date(b.created_at) : b.date ? new Date(b.date) : new Date(0);
         return dateB.getTime() - dateA.getTime();
@@ -83,23 +82,23 @@ const Postingan: React.FC = () => {
       date: formatDate(post.date)
     }));
 
-  // Fungsi untuk menangani klik pada postingan
+
   const handlePostClick = (id: string) => {
     setSelectedPostId(id);
     setIsModalOpen(true);
   };
 
-  // Fungsi untuk menutup modal
+
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedPostId(null);
-    // Hapus hash dari URL saat modal ditutup
+
     window.history.pushState(null, '', window.location.pathname);
   };
 
-  // Fungsi untuk menangani perubahan hash URL
+
   const handleHashChange = useCallback(() => {
-    const hash = window.location.hash.substring(1); // hapus karakter '#'
+    const hash = window.location.hash.substring(1);
     if (hash.startsWith('/post')) {
       const postId = hash.replace('/post', '');
       if (postId) {
@@ -109,31 +108,31 @@ const Postingan: React.FC = () => {
     }
   }, []);
 
-  // Menangani perubahan hash URL
+
   useEffect(() => {
-    // Tangani hash saat halaman pertama kali dimuat
+
     handleHashChange();
 
-    // Tambahkan event listener untuk perubahan hash
+
     window.addEventListener('hashchange', handleHashChange);
 
-    // Bersihkan event listener saat komponen di-unmount
+
     return () => {
       window.removeEventListener('hashchange', handleHashChange);
     };
   }, [handleHashChange]);
 
-  // Dapatkan postingan yang dipilih berdasarkan ID
+
   const selectedPost = selectedPostId ? posts.find(post => post.id === selectedPostId) : null;
 
-  // Fungsi untuk mengonversi format API ke format yang diharapkan oleh PostCard
+
   const convertApiPostToCardPost = (apiPost: Post) => {
-    // Jika img adalah array UUID, kita buat URL placeholder atau nanti bisa diisi dengan URL asli
+
     const img = apiPost.img && apiPost.img.length > 0 
       ? `https://via.placeholder.com/400x200?text=Image+${apiPost.img[0]}` 
       : 'https://via.placeholder.com/400x200?text=No+Image';
     
-    // Ensure date is a string (convert null to empty string or format date)
+
     const date = apiPost.date || formatDate(apiPost.created_at) || 'Tanggal tidak tersedia';
     
     return {
