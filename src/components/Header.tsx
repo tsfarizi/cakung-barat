@@ -1,16 +1,56 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 
+// Type definition for NodeJS.Timeout to resolve TypeScript error
+declare global {
+  namespace NodeJS {
+    interface Timeout {
+      ref(): void;
+      unref(): void;
+    }
+  }
+}
+
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  
+  const [isScrolling, setIsScrolling] = useState(false);
+
   // Import logo image
   const logoImg = new URL('/logo.png', import.meta.url).href;
 
+  // Handle scroll effect for trailing animation
+  useEffect(() => {
+    let timeoutId: number | null = null;
+
+    const handleScroll = () => {
+      setIsScrolling(true);
+      
+      // Clear the timeout if it exists
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+
+      // Set a new timeout to remove the scrolling class after 300ms delay (for trailing effect)
+      timeoutId = window.setTimeout(() => {
+        setIsScrolling(false);
+      }, 300);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+
+    // Cleanup the event listener
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (timeoutId) {
+        window.clearTimeout(timeoutId);
+      }
+    };
+  }, []);
+
   return (
-    <header className="bg-[#054569] text-white py-2.5 sticky top-0 z-50 shadow-lg">
-      <div className="w-9/10 max-w-none mx-auto flex items-center justify-between">
+    <header className={`bg-[#054569] text-white py-2.5 sticky top-0 z-50 shadow-lg rounded-full w-4/5 max-w-6xl mx-auto transition-all duration-500 border-2 border-white ${isScrolling ? 'opacity-90 -translate-y-1' : 'opacity-100'}`}>
+      <div className="w-full mx-auto flex items-center justify-between px-4">
         <div className="flex items-center gap-2.5">
           <img src={logoImg} alt="Logo" className="w-10 h-auto" />
           <span className="font-bold text-lg text-white">Cakung Barat</span>
@@ -38,7 +78,7 @@ const Header: React.FC = () => {
 
       {/* Mobile Menu */}
       <div
-        className={`md:hidden absolute top-full left-0 w-full bg-[#054569] transition-all duration-300 ease-in-out overflow-hidden ${
+        className={`md:hidden absolute top-full left-0 w-full bg-[#054569] transition-all duration-300 ease-in-out overflow-hidden rounded-b-2xl ${
           isMenuOpen ? 'max-h-screen opacity-100 py-4' : 'max-h-0 opacity-0'
         }`}
       >

@@ -165,9 +165,7 @@ const Home: React.FC = () => {
                 href="/#/profil"
                 className="flex items-center justify-center lg:justify-start bg-linear-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white font-bold py-4 px-8 rounded-xl transition-all duration-300 shadow-lg hover:shadow-2xl transform hover:-translate-y-0.5"
               >
-                <span className="text-lg">Lihat Profil L
-                  
-                  engkap</span>
+                <span className="text-lg">Lihat Profill Lengkap</span>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-6 w-6 ml-2 transition-transform duration-300 group-hover:translate-x-1"
