@@ -9,7 +9,7 @@ const Chatbot: React.FC = () => {
   const [botMessage, setBotMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [messageIndex, setMessageIndex] = useState(0);
-  
+
   const botResponses = [
     "Halo! Ada yang bisa kami bantu?",
     "Selamat datang di layanan informasi Kelurahan Cakung Barat",
@@ -20,10 +20,12 @@ const Chatbot: React.FC = () => {
   const displayTypingMessage = (message: string) => {
     setIsTyping(true);
     setBotMessage('');
+    let currentText = '';
     let i = 0;
     const typingInterval = setInterval(() => {
       if (i < message.length) {
-        setBotMessage(prev => prev + message.charAt(i));
+        currentText += message.charAt(i);
+        setBotMessage(currentText);
         i++;
       } else {
         clearInterval(typingInterval);
@@ -47,14 +49,14 @@ const Chatbot: React.FC = () => {
     <div className="relative">
       {/* Chat icon dengan animasi */}
       <motion.img
-        src="/chat-icon.png"
+        src="/cakung-barat/chat-icon.png"
         alt="Chat"
         id="chat-toggle"
         className="w-14 h-14 fixed bottom-6 right-6 cursor-pointer z-999 rounded-full bg-white shadow-lg"
         onClick={openChat}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.95 }}
-        animate={isPulsing ? { 
+        animate={isPulsing ? {
           scale: [1, 1.1, 1],
           rotate: [0, 2, -2, 0]
         } : {}}
@@ -62,30 +64,30 @@ const Chatbot: React.FC = () => {
           const target = e.target as HTMLImageElement;
           target.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="%231E90FF"/><path d="M8 12h8M12 8v8" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>';
         }}
-        transition={{ 
+        transition={{
           scale: { duration: 2, repeat: Infinity, repeatType: "reverse" },
           rotate: { duration: 3, repeat: Infinity, repeatType: "reverse" }
         }}
         onAnimationComplete={() => isPulsing && setIsPulsing(true)}
       />
-      
+
       {/* Chat window dengan animasi */}
       <AnimatePresence>
         {isOpen && (
-          <motion.div 
+          <motion.div
             className="chat-window"
             id="chat-window"
-            style={{ 
-              display: 'flex', 
-              flexDirection: 'column', 
-              position: 'fixed', 
-              bottom: '90px', 
-              right: '25px', 
-              width: '320px', 
-              background: '#fff', 
-              borderRadius: '10px', 
-              boxShadow: '0 0 10px rgba(0,0,0,.2)', 
-              overflow: 'hidden', 
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              position: 'fixed',
+              bottom: '90px',
+              right: '25px',
+              width: '320px',
+              background: '#fff',
+              borderRadius: '10px',
+              boxShadow: '0 0 10px rgba(0,0,0,.2)',
+              overflow: 'hidden',
               zIndex: '999'
             }}
             initial={{ opacity: 0, y: 20, scale: 0.8 }}
@@ -93,15 +95,15 @@ const Chatbot: React.FC = () => {
             exit={{ opacity: 0, y: 20, scale: 0.8 }}
             transition={{ type: 'spring', damping: 20, stiffness: 300 }}
           >
-            <div 
-              className="chat-header" 
-              style={{ 
-                background: 'var(--primary)', 
-                color: '#fff', 
-                padding: '10px', 
-                display: 'flex', 
-                justifyContent: 'space-between', 
-                alignItems: 'center' 
+            <div
+              className="chat-header"
+              style={{
+                background: 'var(--primary)',
+                color: '#fff',
+                padding: '10px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
               }}
             >
               <h4 className="m-0">Chatbot Cakung Barat</h4>
@@ -113,54 +115,35 @@ const Chatbot: React.FC = () => {
                 &times;
               </button>
             </div>
-            <div 
-              className="chat-body" 
-              id="chat-body" 
-              style={{ 
-                height: '300px', 
-                overflowY: 'auto', 
-                padding: '10px' 
+            <div
+              className="chat-body"
+              id="chat-body"
+              style={{
+                height: '300px',
+                overflowY: 'auto',
+                padding: '10px'
               }}
             >
-              {isTyping ? (
-                <div 
-                  className="bot-message flex items-center" 
-                  style={{ 
-                    background: '#e5e5e5', 
-                    marginBottom: '10px', 
-                    padding: '8px 10px', 
-                    borderRadius: '8px', 
-                    maxWidth: '80%',
-                    display: 'inline-block'
-                  }}
-                >
-                  <div className="typing-indicator">
-                    <div className="dot"></div>
-                    <div className="dot"></div>
-                    <div className="dot"></div>
-                  </div>
-                </div>
-              ) : (
-                <div 
-                  className="bot-message" 
-                  style={{ 
-                    background: '#e5e5e5', 
-                    marginBottom: '10px', 
-                    padding: '8px 10px', 
-                    borderRadius: '8px', 
-                    maxWidth: '80%',
-                    whiteSpace: 'pre-wrap'
-                  }}
-                >
-                  {botMessage}
-                </div>
-              )}
+              <div
+                className="bot-message"
+                style={{
+                  background: '#e5e5e5',
+                  marginBottom: '10px',
+                  padding: '8px 10px',
+                  borderRadius: '8px',
+                  maxWidth: '80%',
+                  whiteSpace: 'pre-wrap'
+                }}
+              >
+                {botMessage}
+                {isTyping && <span className="blinking-cursor">|</span>}
+              </div>
             </div>
-            <div 
-              className="chat-input" 
-              style={{ 
-                display: 'flex', 
-                borderTop: '1px solid #ddd' 
+            <div
+              className="chat-input"
+              style={{
+                display: 'flex',
+                borderTop: '1px solid #ddd'
               }}
             >
               <input
@@ -179,35 +162,17 @@ const Chatbot: React.FC = () => {
           </motion.div>
         )}
       </AnimatePresence>
-      
-      {/* Menambahkan styling untuk typing indicator */}
+
+      {/* Menambahkan styling untuk cursor */}
       <style>{`
-        .typing-indicator {
-          display: flex;
-          align-items: center;
+        .blinking-cursor {
+          animation: blink 1s infinite;
+          margin-left: 4px;
         }
-        
-        .dot {
-          width: 8px;
-          height: 8px;
-          background-color: #666;
-          border-radius: 50%;
-          margin: 0 2px;
-          animation: typing 1.4s infinite ease-in-out;
-        }
-        
-        .dot:nth-child(1) { animation-delay: -0.32s; }
-        .dot:nth-child(2) { animation-delay: -0.16s; }
-        
-        @keyframes typing {
-          0%, 80%, 100% {
-            transform: scale(0.8);
-            opacity: 0.5;
-          }
-          40% {
-            transform: scale(1);
-            opacity: 1;
-          }
+
+        @keyframes blink {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0; }
         }
       `}</style>
     </div>
