@@ -118,7 +118,8 @@ const PostDetailModal: React.FC<PostDetailModalProps> = ({ post, isOpen, onClose
                 <img
                   src={currentImage}
                   alt={post.title}
-                  className="w-full h-64 md:h-80 object-cover"
+                  className="w-full h-80 md:h-96 object-cover cursor-pointer"
+                  onClick={() => !isPlaceholder && setShowLightbox(true)}
                 />
 
                 {/* Zoom button */}

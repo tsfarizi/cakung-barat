@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Card,
   CardFooter,
@@ -25,8 +25,6 @@ interface PostCardProps {
 }
 
 const PostCard: React.FC<PostCardProps> = ({ post, onPostClick }) => {
-  const [showLightbox, setShowLightbox] = useState(false);
-
   const handleClick = () => {
     if (onPostClick) {
       onPostClick(post.id);
@@ -35,12 +33,11 @@ const PostCard: React.FC<PostCardProps> = ({ post, onPostClick }) => {
 
   const handleImageClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!post.isLoadingImage && !post.hasNoFolder) {
-      setShowLightbox(true);
+    // Open detail modal instead of lightbox
+    if (onPostClick) {
+      onPostClick(post.id);
     }
   };
-
-  const isPlaceholder = post.img.includes('placehold.co');
 
   return (
     <>
@@ -57,7 +54,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, onPostClick }) => {
             <img
               src={post.img}
               alt={post.title}
-              className={`w-full h-48 object-cover ${!isPlaceholder ? 'cursor-pointer hover:opacity-90 transition-opacity' : ''}`}
+              className="w-full h-48 object-cover cursor-pointer hover:opacity-90 transition-opacity"
               onClick={handleImageClick}
             />
           )}
@@ -109,27 +106,6 @@ const PostCard: React.FC<PostCardProps> = ({ post, onPostClick }) => {
           </CardFooter>
         </div>
       </Card>
-
-      {/* Image Lightbox */}
-      {showLightbox && !isPlaceholder && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4"
-          onClick={() => setShowLightbox(false)}
-        >
-          <button
-            className="absolute top-4 right-4 text-white text-4xl hover:text-gray-300 transition-colors"
-            onClick={() => setShowLightbox(false)}
-          >
-            ×
-          </button>
-          <img
-            src={post.img}
-            alt={post.title}
-            className="max-w-full max-h-full object-contain"
-            onClick={(e) => e.stopPropagation()}
-          />
-        </div>
-      )}
     </>
   );
 };
