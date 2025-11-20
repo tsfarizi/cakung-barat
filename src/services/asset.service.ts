@@ -77,7 +77,21 @@ class AssetService extends HttpClient {
     }
 
     public async listFolder(folderName: string): Promise<Asset[]> {
-        return this.get<Asset[]>(`/api/assets/folders/${encodeURIComponent(folderName)}`);
+        console.log('[ASSETS] listFolder called with:', folderName);
+        try {
+            const url = `/api/assets/folders/${encodeURIComponent(folderName)}`;
+            console.log('[ASSETS] Making GET request to:', url);
+            const result = await this.get<Asset[]>(url);
+            console.log('[ASSETS] ✅ Assets received:', {
+                folder: folderName,
+                count: result.length,
+                assets: result.map(a => ({ id: a.id, url: a.url, filename: a.filename }))
+            });
+            return result;
+        } catch (error) {
+            console.error('[ASSETS] ❌ Error listing folder:', folderName, error);
+            throw error;
+        }
     }
 
     public async deleteAsset(id: string): Promise<void> {

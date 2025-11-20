@@ -12,15 +12,52 @@ export class HttpClient {
             },
         });
 
+        console.log('[HTTP] HttpClient initialized with baseURL:', baseURL);
+
+        // Add request interceptor
+        this.instance.interceptors.request.use(
+            (config) => {
+                console.log('[HTTP] 📤 Request:', {
+                    method: config.method?.toUpperCase(),
+                    url: config.url,
+                    baseURL: config.baseURL,
+                    fullURL: `${config.baseURL}${config.url}`
+                });
+                return config;
+            },
+            (error) => {
+                console.error('[HTTP] ❌ Request Error:', error);
+                return Promise.reject(error);
+            }
+        );
+
         this.initializeResponseInterceptor();
     }
 
     private initializeResponseInterceptor = () => {
         this.instance.interceptors.response.use(
-            this.handleResponse,
-            this.handleError
+            (response) => {
+                console.log('[HTTP] 📥 Response:', {
+                    status: response.status,
+                    url: response.config.url,
+                    dataType: typeof response.data,
+                    dataLength: Array.isArray(response.data) ? response.data.length : 'N/A'
+                });
+                return this.handleResponse(response);
+            },
+            (error) => {
+                console.error('[HTTP] ❌ Response Error:', {
+                    url: error.config?.url,
+                    status: error.response?.status,
+                    message: error.message,
+                    data: error.response?.data
+                });
+                return this.handleError(error);
+            }
         );
-    };
+    }
+
+
 
     private handleResponse = ({ data }: AxiosResponse) => data;
 

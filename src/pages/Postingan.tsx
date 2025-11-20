@@ -6,13 +6,22 @@ import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import { Search, Filter, Calendar } from 'lucide-react';
 import { usePosting } from '../contexts/PostingContext';
+import { assetService } from '../services/asset.service';
 import type { Post } from '../api/dto/posting.dto';
 
 const Postingan: React.FC = () => {
   const { setHeader } = usePageHeader();
   const { posts, loading, error, fetchPosts } = usePosting();
 
+  console.log('[POSTINGAN] Component state:', {
+    postsCount: posts.length,
+    loading,
+    error,
+    posts: posts.map(p => ({ id: p.id, title: p.title, folder_id: p.folder_id }))
+  });
+
   useEffect(() => {
+    console.log('[POSTINGAN] Header useEffect triggered');
     setHeader(
       'Postingan & Berita',
       'Ikuti berita terkini, pengumuman penting, dan kegiatan terbaru dari Kelurahan Cakung Barat.'
@@ -105,17 +114,92 @@ const Postingan: React.FC = () => {
   const selectedPost = selectedPostId ? posts.find(post => post.id === selectedPostId) : null;
 
 
+  const [postImages, setPostImages] = useState<Record<string, string[]>>({});
+  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8080';
+
+  useEffect(() => {
+    // Fetch images for all posts
+    const fetchImages = async () => {
+      console.log('[POSTINGAN] 🖼️ Starting fetchImages');
+      console.log('[POSTINGAN] API_BASE_URL:', API_BASE_URL);
+      console.log('[POSTINGAN] Posts to process:', posts.length);
+      const imageMap: Record<string, string[]> = {};
+
+      for (const post of posts) {
+        console.log('[POSTINGAN] ---Processing post---');
+        console.log('[POSTINGAN] Post ID:', post.id);
+        console.log('[POSTINGAN] Post Title:', post.title);
+        console.log('[POSTINGAN] Folder ID:', post.folder_id);
+
+        if (post.folder_id) {
+          try {
+            console.log('[POSTINGAN] Fetching assets from folder:', post.folder_id);
+            const assets = await assetService.listFolder(post.folder_id);
+            console.log('[POSTINGAN] ✅ Assets fetched successfully:', assets.length, 'assets');
+
+            if (assets && assets.length > 0) {
+              // Convert relative URLs to absolute URLs and store ALL images
+              const fullUrls = assets.map(asset => {
+                const fullUrl = `${API_BASE_URL}${asset.url}`;
+                console.log('[POSTINGAN] Asset URL conversion:', {
+                  original: asset.url,
+                  full: fullUrl,
+                  filename: asset.filename
+                });
+                return fullUrl;
+              });
+
+              imageMap[post.id] = fullUrls;
+              console.log('[POSTINGAN] ✅ Stored', fullUrls.length, 'images for post', post.id);
+            } else {
+              console.warn('[POSTINGAN] ⚠️ No assets found for post', post.id);
+            }
+          } catch (error) {
+            console.error('[POSTINGAN] ❌ Failed to fetch assets for post', post.id, ':', error);
+          }
+        } else {
+          console.warn('[POSTINGAN] ⚠️ Post', post.id, 'has no folder_id');
+        }
+      }
+
+      console.log('[POSTINGAN] 🎯 Final image map:', imageMap);
+      console.log('[POSTINGAN] 🎯 Total posts with images:', Object.keys(imageMap).length);
+      setPostImages(imageMap);
+      console.log('[POSTINGAN] ✅ fetchImages completed');
+    };
+
+    if (posts.length > 0) {
+      console.log('[POSTINGAN] Triggering fetchImages because posts changed');
+      fetchImages();
+    } else {
+      console.log('[POSTINGAN] No posts to fetch images for');
+    }
+  }, [posts, API_BASE_URL]);
+
   const convertApiPostToCardPost = (apiPost: Post) => {
-    // Since the API no longer returns an img array, we use a placeholder.
-    // In a real app, we might fetch assets using asset_ids or folder_id.
-    const img = 'https://placehold.co/400x200?text=No+Image';
+    // Use the first image from the post's images array, or placeholder
+    const images = postImages[apiPost.id] || [];
+    const hasNoFolder = !apiPost.folder_id;
+    const isLoadingImage = Boolean(apiPost.folder_id && images.length === 0);
+    const img = images[0] || (hasNoFolder ? 'https://placehold.co/400x200?text=No+Image' : 'https://placehold.co/400x200?text=Loading');
+
+    console.log('[POSTINGAN] convertApiPostToCardPost:', {
+      postId: apiPost.id,
+      imagesAvailable: images.length,
+      selectedImage: img,
+      isLoadingImage,
+      hasNoFolder
+    });
 
     const date = apiPost.date || formatDate(apiPost.created_at) || 'Tanggal tidak tersedia';
 
     return {
       ...apiPost,
       img,
-      date
+      images, // Pass all images for carousel
+      date,
+      isLoadingImage,
+      hasNoFolder
     };
   };
 
