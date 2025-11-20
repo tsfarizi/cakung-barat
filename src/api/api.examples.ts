@@ -2,15 +2,14 @@ import { apiService } from './api.service';
 import type { CreatePostingRequest, UpdatePostingRequest } from './dto/posting.dto';
 
 const createNewPosting = async () => {
-  const postingData: CreatePostingRequest = {
-    title: 'New Post Title',
-    category: 'News',
-    excerpt: 'This is a sample excerpt for the new post.',
-    img: ['image-uuid-1', 'image-uuid-2']
+  const newPost: CreatePostingRequest = {
+    title: 'Kegiatan Kerja Bakti',
+    category: 'Kegiatan',
+    excerpt: 'Warga Cakung Barat melakukan kerja bakti membersihkan lingkungan.',
   };
 
   try {
-    const newPosting = await apiService.createPosting(postingData);
+    const newPosting = await apiService.createPosting(newPost);
     console.log('Created posting:', newPosting);
   } catch (error) {
     console.error('Error creating posting:', error);

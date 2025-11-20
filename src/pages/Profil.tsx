@@ -250,14 +250,6 @@ const Profil: React.FC = () => {
             animate={{ opacity: isVisible.strukturOrganisasi ? 1 : 0, scale: isVisible.strukturOrganisasi ? 1 : 0.95 }}
             transition={{ duration: 0.6 }}
           >
-            <div className="text-center mb-16">
-              <h2 className="text-3xl font-bold text-dark mb-4">Struktur Organisasi</h2>
-              <div className="w-24 h-1 bg-accent mx-auto rounded-full"></div>
-              <p className="mt-4 text-gray-700 max-w-2xl mx-auto">
-                Organisasi Kelurahan Cakung Barat yang terdiri dari berbagai unsur pemerintahan
-                dan masyarakat dalam melayani kebutuhan warga.
-              </p>
-            </div>
           </motion.div>
           <StrukturOrganisasi />
         </div>

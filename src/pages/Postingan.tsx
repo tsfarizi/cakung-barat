@@ -5,11 +5,12 @@ import PostDetailModal from '../components/PostDetailModal';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import { Search, Filter, Calendar } from 'lucide-react';
-import { apiService } from '../api';
+import { usePosting } from '../contexts/PostingContext';
 import type { Post } from '../api/dto/posting.dto';
 
 const Postingan: React.FC = () => {
   const { setHeader } = usePageHeader();
+  const { posts, loading, error, fetchPosts } = usePosting();
 
   useEffect(() => {
     setHeader(
@@ -24,29 +25,11 @@ const Postingan: React.FC = () => {
   const [filterCategory, setFilterCategory] = useState('all');
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
 
   useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        setLoading(true);
-        const fetchedPosts = await apiService.getAllPostings();
-        setPosts(fetchedPosts);
-        setError(null);
-      } catch (err) {
-        console.error('Error fetching posts:', err);
-        setError('Gagal memuat postingan. Silakan coba lagi nanti.');
-        setPosts([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchPosts();
-  }, []);
+  }, [fetchPosts]);
 
 
   const categories = ['all', ...new Set(posts.map(post => post.category))];
@@ -60,8 +43,8 @@ const Postingan: React.FC = () => {
 
   const filteredAndSortedPosts = posts
     .filter(post => {
-      const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                           post.excerpt.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        post.excerpt.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesCategory = filterCategory === 'all' || post.category === filterCategory;
       return matchesSearch && matchesCategory;
     })
@@ -123,14 +106,12 @@ const Postingan: React.FC = () => {
 
 
   const convertApiPostToCardPost = (apiPost: Post) => {
-
-    const img = apiPost.img && apiPost.img.length > 0 
-      ? `https://placehold.co/400x200?text=Image+${apiPost.img[0]}` 
-      : 'https://placehold.co/400x200?text=No+Image';
-    
+    // Since the API no longer returns an img array, we use a placeholder.
+    // In a real app, we might fetch assets using asset_ids or folder_id.
+    const img = 'https://placehold.co/400x200?text=No+Image';
 
     const date = apiPost.date || formatDate(apiPost.created_at) || 'Tanggal tidak tersedia';
-    
+
     return {
       ...apiPost,
       img,
@@ -199,7 +180,7 @@ const Postingan: React.FC = () => {
                 </Select>
               </div>
             </div>
-            
+
             {/* Jumlah postingan yang ditemukan */}
             <div className="mt-4 text-sm text-gray-600">
               Ditemukan {filteredAndSortedPosts.length} postingan
@@ -228,10 +209,10 @@ const Postingan: React.FC = () => {
         ) : filteredAndSortedPosts.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredAndSortedPosts.map((post) => (
-              <PostCard 
-                key={post.id} 
-                post={convertApiPostToCardPost(post)} 
-                onPostClick={handlePostClick} 
+              <PostCard
+                key={post.id}
+                post={convertApiPostToCardPost(post)}
+                onPostClick={handlePostClick}
               />
             ))}
           </div>
@@ -246,10 +227,10 @@ const Postingan: React.FC = () => {
 
         {/* Modal Detail Postingan */}
         {selectedPostForModal && isModalOpen && (
-          <PostDetailModal 
-            post={selectedPostForModal} 
-            isOpen={isModalOpen} 
-            onClose={handleCloseModal} 
+          <PostDetailModal
+            post={selectedPostForModal}
+            isOpen={isModalOpen}
+            onClose={handleCloseModal}
           />
         )}
       </div>
