@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { usePageHeader } from '../contexts/PageHeaderContext';
-import PostCard from '../components/PostCard';
 import PostDetailModal from '../components/PostDetailModal';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
@@ -8,6 +7,7 @@ import { Search, Filter, Calendar } from 'lucide-react';
 import { usePosting } from '../contexts/PostingContext';
 import { assetService } from '../services/asset.service';
 import type { Post } from '../api/dto/posting.dto';
+import { motion } from 'framer-motion';
 
 const Postingan: React.FC = () => {
   const { setHeader } = usePageHeader();
@@ -23,8 +23,8 @@ const Postingan: React.FC = () => {
   useEffect(() => {
     console.log('[POSTINGAN] Header useEffect triggered');
     setHeader(
-      'Postingan & Berita',
-      'Ikuti berita terkini, pengumuman penting, dan kegiatan terbaru dari Kelurahan Cakung Barat.'
+      'Galeri Postingan',
+      'Lihat galeri foto kegiatan dan berita terbaru dari Kelurahan Cakung Barat.'
     );
   }, [setHeader]);
 
@@ -207,7 +207,7 @@ const Postingan: React.FC = () => {
 
   return (
     <section className="py-16 px-5 bg-gray-50">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         {/* Filter dan Search Section */}
         <div className="mb-12">
           <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
@@ -272,12 +272,12 @@ const Postingan: React.FC = () => {
           </div>
         </div>
 
-        {/* Posts Grid */}
+        {/* Gallery Grid */}
         {loading ? (
           <div className="flex justify-center items-center h-64">
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-              <p className="mt-4 text-gray-600">Memuat postingan...</p>
+              <p className="mt-4 text-gray-600">Memuat galeri...</p>
             </div>
           </div>
         ) : error ? (
@@ -291,21 +291,60 @@ const Postingan: React.FC = () => {
             <p className="text-gray-500 mt-2">Postingan akan muncul di sini ketika sudah tersedia</p>
           </div>
         ) : filteredAndSortedPosts.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredAndSortedPosts.map((post) => (
-              <PostCard
-                key={post.id}
-                post={convertApiPostToCardPost(post)}
-                onPostClick={handlePostClick}
-              />
-            ))}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {filteredAndSortedPosts.map((post, index) => {
+              const postData = convertApiPostToCardPost(post);
+              return (
+                <motion.div
+                  key={post.id}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.3, delay: index * 0.05 }}
+                  className="relative aspect-square group cursor-pointer overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-all duration-300"
+                  onClick={() => handlePostClick(post.id)}
+                >
+                  {/* Image */}
+                  {postData.isLoadingImage ? (
+                    <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                    </div>
+                  ) : (
+                    <img
+                      src={postData.img}
+                      alt={post.title}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    />
+                  )}
+
+                  {/* Overlay with title on hover */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
+                    <span className="text-xs text-blue-300 font-medium mb-1">{post.category}</span>
+                    <h3 className="text-white font-semibold text-sm line-clamp-2">{post.title}</h3>
+                    <span className="text-gray-300 text-xs mt-1">{postData.date}</span>
+                  </div>
+
+                  {/* Category badge */}
+                  <div className="absolute top-3 left-3 bg-blue-600/90 text-white text-xs font-medium px-2 py-1 rounded-full">
+                    {post.category}
+                  </div>
+
+                  {/* Multiple images indicator */}
+                  {postData.images && postData.images.length > 1 && (
+                    <div className="absolute top-3 right-3 bg-black/60 text-white text-xs font-medium px-2 py-1 rounded-full flex items-center gap-1">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      {postData.images.length}
+                    </div>
+                  )}
+                </motion.div>
+              );
+            })}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div className="col-span-full text-center py-12">
-              <h3 className="text-lg font-medium text-gray-900">Postingan tidak ditemukan</h3>
-              <p className="text-gray-500 mt-2">Coba kata kunci atau filter lainnya</p>
-            </div>
+          <div className="text-center py-12">
+            <h3 className="text-lg font-medium text-gray-900">Postingan tidak ditemukan</h3>
+            <p className="text-gray-500 mt-2">Coba kata kunci atau filter lainnya</p>
           </div>
         )}
 

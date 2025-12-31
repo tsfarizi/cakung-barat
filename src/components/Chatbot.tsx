@@ -1,45 +1,133 @@
-import React, { useState} from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+
+interface Message {
+  id: string;
+  type: 'user' | 'bot';
+  content: string;
+}
+
+interface ChatResponse {
+  session_id: string;
+  content: string;
+  provider: string;
+  model: string;
+  tool_steps: unknown[];
+}
+
+const CHAT_URL = import.meta.env.VITE_CHAT_URL || 'https://c2p9p0rq-8080.asse.devtunnels.ms/chat';
+const SESSION_KEY = 'chatbot_session_id';
 
 const Chatbot: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isPulsing, setIsPulsing] = useState(true);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [inputValue, setInputValue] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const chatBodyRef = useRef<HTMLDivElement>(null);
 
-  const [botMessage, setBotMessage] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
-  const [messageIndex, setMessageIndex] = useState(0);
+  // Get or create session ID from sessionStorage
+  const getSessionId = (): string | null => {
+    return sessionStorage.getItem(SESSION_KEY);
+  };
 
-  const botResponses = [
-    "Halo! Ada yang bisa kami bantu?",
-    "Selamat datang di layanan informasi Kelurahan Cakung Barat",
-    "Anda bisa bertanya tentang pelayanan administrasi, kependudukan, atau informasi terkini"
-  ];
+  const setSessionId = (sessionId: string) => {
+    sessionStorage.setItem(SESSION_KEY, sessionId);
+  };
 
-  const displayTypingMessage = (message: string) => {
-    setIsTyping(true);
-    setBotMessage('');
-    let currentText = '';
-    let i = 0;
-    const typingInterval = setInterval(() => {
-      if (i < message.length) {
-        currentText += message.charAt(i);
-        setBotMessage(currentText);
-        i++;
-      } else {
-        clearInterval(typingInterval);
-        setIsTyping(false);
+  // Scroll to bottom when new messages arrive
+  useEffect(() => {
+    if (chatBodyRef.current) {
+      chatBodyRef.current.scrollTop = chatBodyRef.current.scrollHeight;
+    }
+  }, [messages]);
+
+  // Send message to API
+  const sendMessage = async (prompt: string) => {
+    if (!prompt.trim() || isLoading) return;
+
+    // Add user message to chat
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      type: 'user',
+      content: prompt
+    };
+    setMessages(prev => [...prev, userMessage]);
+    setInputValue('');
+    setIsLoading(true);
+
+    try {
+      const sessionId = getSessionId();
+
+      // Build request body
+      const requestBody: { prompt: string; agent: boolean; session_id?: string } = {
+        prompt: prompt,
+        agent: true
+      };
+
+      // Add session_id if we have one (not first message)
+      if (sessionId) {
+        requestBody.session_id = sessionId;
       }
-    }, 30);
+
+      const response = await fetch(CHAT_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody)
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: ChatResponse = await response.json();
+
+      // Save session_id for future requests
+      if (data.session_id) {
+        setSessionId(data.session_id);
+      }
+
+      // Add bot response to chat
+      const botMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        type: 'bot',
+        content: data.content
+      };
+      setMessages(prev => [...prev, botMessage]);
+
+    } catch (error) {
+      console.error('Chat error:', error);
+      // Add error message
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        type: 'bot',
+        content: 'Maaf, terjadi kesalahan saat menghubungi server. Silakan coba lagi.'
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    sendMessage(inputValue);
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage(inputValue);
+    }
   };
 
   const openChat = () => {
     setIsOpen(!isOpen);
-    if (!isOpen) {
-      setTimeout(() => {
-        displayTypingMessage(botResponses[messageIndex]);
-        setMessageIndex((prevIndex) => (prevIndex + 1) % botResponses.length);
-      }, 300);
-    }
+    setIsPulsing(false);
   };
 
   return (
@@ -49,7 +137,7 @@ const Chatbot: React.FC = () => {
         src="/cakung-barat/chat-icon.png"
         alt="Chat"
         id="chat-toggle"
-        className="w-14 h-14 fixed bottom-6 right-6 cursor-pointer z-999 rounded-full bg-white shadow-lg p-2"
+        className="w-14 h-14 fixed bottom-6 right-6 cursor-pointer z-[999] rounded-full bg-white shadow-lg p-2"
         style={{
           background: 'rgba(255, 255, 255, 0.25)',
           backdropFilter: 'blur(10px)',
@@ -78,59 +166,58 @@ const Chatbot: React.FC = () => {
         onAnimationComplete={() => isPulsing && setIsPulsing(true)}
       />
 
-      {/* Chat window dengan animasi dan glassmorphism */}
+      {/* Chat window - Responsive: full screen on mobile, wider on desktop */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            className="chat-window glassmorphism"
+            className="chat-window glassmorphism fixed z-[999]
+              inset-0 sm:inset-auto
+              sm:bottom-[90px] sm:right-[25px]
+              sm:w-[500px] md:w-[600px] lg:w-[700px]
+              sm:h-[450px] md:h-[480px] lg:h-[500px]
+              sm:rounded-2xl"
             id="chat-window"
             style={{
               display: 'flex',
               flexDirection: 'column',
-              position: 'fixed',
-              bottom: '90px',
-              right: '25px',
-              width: '320px',
               backdropFilter: 'blur(16px)',
               WebkitBackdropFilter: 'blur(16px)',
-              backgroundColor: 'rgba(255, 255, 255, 0.2)',
-              borderRadius: '16px',
+              backgroundColor: 'rgba(255, 255, 255, 0.85)',
               border: '1px solid rgba(255, 255, 255, 0.18)',
               boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.37)',
-              overflow: 'hidden',
-              zIndex: '999'
+              overflow: 'hidden'
             }}
-            initial={{ opacity: 0, y: 20, scale: 0.8, rotateX: 90 }}
-            animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
-            exit={{ opacity: 0, y: 20, scale: 0.8, rotateX: 90 }}
+            initial={{ opacity: 0, y: 20, scale: 0.8 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.8 }}
             transition={{
               type: 'spring',
               damping: 20,
-              stiffness: 300,
-              rotateX: { duration: 0.3 }
+              stiffness: 300
             }}
           >
+            {/* Header */}
             <div
-              className="chat-header glassmorphism-header"
+              className="chat-header"
               style={{
-                background: 'rgba(30, 144, 255, 0.4)',
+                background: 'linear-gradient(135deg, rgba(30, 144, 255, 0.9), rgba(0, 100, 200, 0.9))',
                 backdropFilter: 'blur(10px)',
                 WebkitBackdropFilter: 'blur(10px)',
                 color: '#fff',
-                padding: '12px 16px',
+                padding: '16px 20px',
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
                 borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
               }}
             >
-              <h4 className="m-0 font-bold flex items-center gap-2">
+              <h4 className="m-0 font-bold flex items-center gap-2 text-lg">
                 <span className="w-3 h-3 rounded-full bg-green-400 animate-pulse"></span>
                 Chatbot Cakung Barat
               </h4>
               <motion.button
                 id="chat-close"
-                className="text-white bg-none border-none text-xl cursor-pointer rounded-full w-8 h-8 flex items-center justify-center transition-all"
+                className="text-white bg-none border-none text-2xl cursor-pointer rounded-full w-10 h-10 flex items-center justify-center transition-all"
                 onClick={() => setIsOpen(false)}
                 whileHover={{
                   scale: 1.1,
@@ -142,123 +229,185 @@ const Chatbot: React.FC = () => {
                 &times;
               </motion.button>
             </div>
+
+            {/* Chat Body */}
             <div
-              className="chat-body"
+              ref={chatBodyRef}
+              className="chat-body flex-1"
               id="chat-body"
               style={{
-                height: '300px',
                 overflowY: 'auto',
-                padding: '16px',
+                padding: '20px',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '12px'
+                gap: '16px',
+                backgroundColor: 'rgba(248, 250, 252, 0.5)'
               }}
             >
-              <motion.div
-                className="bot-message glassmorphism-message"
-                style={{
-                  background: 'rgba(255, 255, 255, 0.25)',
-                  backdropFilter: 'blur(4px)',
-                  WebkitBackdropFilter: 'blur(4px)',
-                  color: '#333',
-                  padding: '12px 16px',
-                  borderRadius: '18px 18px 18px 4px',
-                  maxWidth: '85%',
-                  alignSelf: 'flex-start',
-                  border: '1px solid rgba(255, 255, 255, 0.18)',
-                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.05)'
-                }}
-                initial={{ opacity: 0, y: 10, scale: 0.8 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{ duration: 0.3, type: "spring", bounce: 0.3 }}
-              >
-                {botMessage}
-                {isTyping && <span className="blinking-cursor">|</span>}
-              </motion.div>
+              {/* Welcome message when no messages */}
+              {messages.length === 0 && !isLoading && (
+                <div className="text-center py-8 text-gray-500">
+                  <div className="text-4xl mb-4">👋</div>
+                  <p className="text-lg font-medium">Selamat datang!</p>
+                  <p className="text-sm">Silakan ketik pertanyaan Anda tentang layanan Kelurahan Cakung Barat.</p>
+                </div>
+              )}
+
+              {messages.map((message) => (
+                <motion.div
+                  key={message.id}
+                  className={`message ${message.type === 'user' ? 'user-message' : 'bot-message'}`}
+                  style={{
+                    background: message.type === 'user'
+                      ? 'linear-gradient(135deg, rgba(30, 144, 255, 0.9), rgba(0, 100, 200, 0.9))'
+                      : 'rgba(255, 255, 255, 0.9)',
+                    color: message.type === 'user' ? '#fff' : '#333',
+                    padding: '14px 18px',
+                    borderRadius: message.type === 'user'
+                      ? '20px 20px 4px 20px'
+                      : '20px 20px 20px 4px',
+                    maxWidth: '85%',
+                    alignSelf: message.type === 'user' ? 'flex-end' : 'flex-start',
+                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+                    wordWrap: 'break-word'
+                  }}
+                  initial={{ opacity: 0, y: 10, scale: 0.9 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ duration: 0.3, type: "spring", bounce: 0.3 }}
+                >
+                  {message.type === 'bot' ? (
+                    <div className="prose prose-sm max-w-none prose-p:my-1 prose-headings:my-2 prose-ul:my-1 prose-ol:my-1 prose-li:my-0.5">
+                      <ReactMarkdown
+                        remarkPlugins={[remarkGfm]}
+                        components={{
+                          p: (props) => <p className="mb-2 last:mb-0" {...props} />,
+                          h1: (props) => <h1 className="text-lg font-bold mb-2 mt-3" {...props} />,
+                          h2: (props) => <h2 className="text-base font-bold mb-2 mt-3" {...props} />,
+                          h3: (props) => <h3 className="text-sm font-bold mb-1 mt-2" {...props} />,
+                          ul: (props) => <ul className="list-disc pl-4 mb-2" {...props} />,
+                          ol: (props) => <ol className="list-decimal pl-4 mb-2" {...props} />,
+                          li: (props) => <li className="mb-1" {...props} />,
+                          strong: (props) => <strong className="font-semibold" {...props} />,
+                          em: (props) => <em className="italic" {...props} />,
+                          code: (props) => <code className="bg-gray-100 px-1.5 py-0.5 rounded text-sm font-mono" {...props} />,
+                          pre: (props) => <pre className="bg-gray-100 p-3 rounded-lg my-2 overflow-x-auto text-sm" {...props} />,
+                          a: (props) => <a className="text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer" {...props} />,
+                          blockquote: (props) => <blockquote className="border-l-4 border-blue-400 pl-3 italic my-2 text-gray-600" {...props} />,
+                        }}
+                      >
+                        {message.content}
+                      </ReactMarkdown>
+                    </div>
+                  ) : (
+                    message.content
+                  )}
+                </motion.div>
+              ))}
+
+              {isLoading && (
+                <motion.div
+                  className="bot-message"
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.9)',
+                    color: '#333',
+                    padding: '14px 18px',
+                    borderRadius: '20px 20px 20px 4px',
+                    maxWidth: '85%',
+                    alignSelf: 'flex-start',
+                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)'
+                  }}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                >
+                  <div className="flex items-center gap-2">
+                    <div className="flex gap-1">
+                      <span className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                      <span className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                      <span className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                    </div>
+                    <span className="text-sm text-gray-500">Mengetik...</span>
+                  </div>
+                </motion.div>
+              )}
             </div>
-            <div
-              className="chat-input glassmorphism-input"
+
+            {/* Input Form */}
+            <form
+              onSubmit={handleSubmit}
+              className="chat-input"
               style={{
                 display: 'flex',
-                borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-                padding: '12px'
+                borderTop: '1px solid rgba(0, 0, 0, 0.1)',
+                padding: '16px',
+                backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                gap: '12px'
               }}
             >
               <input
                 type="text"
                 id="chat-input"
-                placeholder="Ketik pesan..."
-                className="flex-1 bg-white/30 backdrop-blur-sm p-3 rounded-l-lg border-none outline-none text-gray-800 placeholder-gray-600"
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="Ketik pertanyaan Anda..."
+                disabled={isLoading}
+                className="flex-1 p-4 rounded-xl border border-gray-200 outline-none text-gray-800 placeholder-gray-400 text-base focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all"
                 style={{
-                  backdropFilter: 'blur(4px)',
-                  WebkitBackdropFilter: 'blur(4px)',
-                  backgroundColor: 'rgba(255, 255, 255, 0.3)',
-                  borderTopRightRadius: 0,
-                  borderBottomRightRadius: 0
+                  backgroundColor: 'rgba(248, 250, 252, 1)'
                 }}
               />
               <motion.button
+                type="submit"
                 id="send-btn"
-                className="bg-primary text-white border-none p-3 cursor-pointer rounded-r-lg transition-colors"
+                disabled={isLoading || !inputValue.trim()}
+                className="px-6 py-4 rounded-xl text-white font-medium text-base disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{
-                  borderTopLeftRadius: 0,
-                  borderBottomLeftRadius: 0,
-                  background: 'rgba(30, 144, 255, 0.7)',
-                  backdropFilter: 'blur(4px)',
-                  WebkitBackdropFilter: 'blur(4px)',
-                  border: '1px solid rgba(255, 255, 255, 0.18)',
-                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+                  background: 'linear-gradient(135deg, rgba(30, 144, 255, 1), rgba(0, 100, 200, 1))',
+                  boxShadow: '0 4px 12px rgba(30, 144, 255, 0.3)'
                 }}
-                whileHover={{
-                  scale: 1.05,
-                  background: 'rgba(30, 144, 255, 0.9)',
-                  boxShadow: '0 6px 12px rgba(0, 0, 0, 0.2)'
-                }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={!isLoading && inputValue.trim() ? {
+                  scale: 1.02,
+                  boxShadow: '0 6px 16px rgba(30, 144, 255, 0.4)'
+                } : {}}
+                whileTap={!isLoading ? { scale: 0.98 } : {}}
               >
                 Kirim
               </motion.button>
-            </div>
+            </form>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Menambahkan styling untuk glassmorphism dan animasi tambahan */}
+      {/* Additional styles */}
       <style>{`
-        .blinking-cursor {
-          animation: blink 1s infinite;
-          margin-left: 4px;
+        @keyframes bounce {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-4px); }
         }
 
-        @keyframes blink {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0; }
+        .chat-body::-webkit-scrollbar {
+          width: 6px;
         }
 
-        .glassmorphism {
-          transition: all 0.3s ease;
+        .chat-body::-webkit-scrollbar-track {
+          background: transparent;
         }
 
-        .glassmorphism:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.45);
+        .chat-body::-webkit-scrollbar-thumb {
+          background: rgba(0, 0, 0, 0.2);
+          border-radius: 3px;
         }
 
-        .glassmorphism-header {
-          transition: all 0.3s ease;
+        .chat-body::-webkit-scrollbar-thumb:hover {
+          background: rgba(0, 0, 0, 0.3);
         }
 
-        .glassmorphism-message {
-          transition: all 0.3s ease;
-        }
-
-        .glassmorphism-message:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        .glassmorphism-input {
-          transition: all 0.3s ease;
+        /* Hide chat icon when chat is open on mobile */
+        @media (max-width: 639px) {
+          .chat-window.glassmorphism + #chat-toggle,
+          #chat-toggle:has(+ .chat-window) {
+            display: none;
+          }
         }
       `}</style>
     </div>
