@@ -3,10 +3,32 @@ import { motion, AnimatePresence } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
+interface PdfAttachment {
+  filename: string;
+  data: string; // Base64 encoded PDF
+  mimeType: string;
+}
+
 interface Message {
   id: string;
   type: 'user' | 'bot';
   content: string;
+  attachments?: PdfAttachment[];
+}
+
+interface ToolStepContent {
+  type: string;
+  text?: string;
+  data?: string;
+  mimeType?: string;
+}
+
+interface ToolStep {
+  tool: string;
+  success: boolean;
+  output?: {
+    content?: ToolStepContent[];
+  };
 }
 
 interface ChatResponse {
@@ -14,7 +36,7 @@ interface ChatResponse {
   content: string;
   provider: string;
   model: string;
-  tool_steps: unknown[];
+  tool_steps: ToolStep[];
 }
 
 const CHAT_URL = import.meta.env.VITE_CHAT_URL || 'https://c2p9p0rq-8080.asse.devtunnels.ms/chat';
@@ -91,11 +113,32 @@ const Chatbot: React.FC = () => {
         setSessionId(data.session_id);
       }
 
+      // Extract PDF attachments from tool_steps
+      const pdfAttachments: PdfAttachment[] = [];
+      if (data.tool_steps && data.tool_steps.length > 0) {
+        for (const step of data.tool_steps) {
+          if (step.success && step.output?.content) {
+            for (const contentItem of step.output.content) {
+              if (contentItem.type === 'resource' && contentItem.data && contentItem.mimeType === 'application/pdf') {
+                // Extract filename from text or generate one
+                const filename = contentItem.text?.replace('Generated file: ', '') || `surat_${Date.now()}.pdf`;
+                pdfAttachments.push({
+                  filename,
+                  data: contentItem.data,
+                  mimeType: contentItem.mimeType
+                });
+              }
+            }
+          }
+        }
+      }
+
       // Add bot response to chat
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
         type: 'bot',
-        content: data.content
+        content: data.content,
+        attachments: pdfAttachments.length > 0 ? pdfAttachments : undefined
       };
       setMessages(prev => [...prev, botMessage]);
 
@@ -128,6 +171,31 @@ const Chatbot: React.FC = () => {
   const openChat = () => {
     setIsOpen(!isOpen);
     setIsPulsing(false);
+  };
+
+  // Download PDF from base64 data
+  const downloadPdf = (attachment: PdfAttachment) => {
+    try {
+      // Decode base64 to binary
+      const binaryString = atob(attachment.data);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+
+      // Create blob and trigger download
+      const blob = new Blob([bytes], { type: attachment.mimeType });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = attachment.filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Failed to download PDF:', error);
+    }
   };
 
   return (
@@ -297,6 +365,45 @@ const Chatbot: React.FC = () => {
                       >
                         {message.content}
                       </ReactMarkdown>
+
+                      {/* PDF Attachments */}
+                      {message.attachments && message.attachments.length > 0 && (
+                        <div className="mt-4 space-y-2">
+                          {message.attachments.map((attachment, index) => (
+                            <motion.div
+                              key={index}
+                              className="flex items-center gap-3 p-3 bg-gradient-to-r from-red-50 to-orange-50 rounded-lg border border-red-200 cursor-pointer hover:shadow-md transition-all"
+                              onClick={() => downloadPdf(attachment)}
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                            >
+                              {/* PDF Icon */}
+                              <div className="flex-shrink-0 w-10 h-10 bg-red-500 rounded-lg flex items-center justify-center">
+                                <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
+                                </svg>
+                              </div>
+
+                              {/* File Info */}
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-gray-900 truncate">
+                                  {attachment.filename}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  Klik untuk download PDF
+                                </p>
+                              </div>
+
+                              {/* Download Icon */}
+                              <div className="flex-shrink-0">
+                                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                </svg>
+                              </div>
+                            </motion.div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   ) : (
                     message.content

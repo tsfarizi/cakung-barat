@@ -1,10 +1,79 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
-import orgData from '../data/struktur';
-import type { Member } from '../data/struktur';
+import { motion } from 'framer-motion';
+
+const API_URL = import.meta.env.VITE_API_URL || 'https://cakung-barat-server-1065513777845.asia-southeast2.run.app';
+
+// Server API response type
+interface OrganizationMember {
+  id: number;
+  name: string | null;
+  position: string;
+  photo: string | null;
+  parent_id: number | null;
+  level: number;
+  role: string;
+}
+
+// Client-side type with calculated positions
+interface Member {
+  id: number;
+  name: string;
+  position: string;
+  photo: string;
+  parentId: number | null;
+  x: number;
+  y: number;
+  role: 'lurah' | 'sekretaris' | 'kasi' | 'staf' | 'bendahara' | 'pengurus';
+}
 
 const CARD_WIDTH = 220;
 const CARD_HEIGHT = 100;
+
+// Calculate positions based on level and index
+function calculatePositions(members: OrganizationMember[]): Member[] {
+  // Group members by level
+  const levelGroups = new Map<number, OrganizationMember[]>();
+  members.forEach(m => {
+    const group = levelGroups.get(m.level) || [];
+    group.push(m);
+    levelGroups.set(m.level, group);
+  });
+
+  // Y position by level
+  const levelY: Record<number, number> = {
+    0: 30,    // Top (Lurah)
+    1: 180,   // Second row (Sekretaris)
+    2: 380,   // Third row (Kasi, Bendahara, etc)
+    3: 600,   // Fourth row (Staff)
+  };
+
+  const positioned: Member[] = [];
+  const containerWidth = 1400;
+
+  // Process each level
+  for (const [level, group] of levelGroups) {
+    const y = levelY[level] || (level * 200 + 30);
+    const count = group.length;
+    const spacing = Math.min(280, (containerWidth - 100) / (count + 1));
+    const startX = (containerWidth - (count - 1) * spacing) / 2 - CARD_WIDTH / 2;
+
+    group.forEach((member, index) => {
+      positioned.push({
+        id: member.id,
+        name: member.name || '',
+        position: member.position,
+        photo: member.photo || 'foto',
+        parentId: member.parent_id,
+        x: startX + index * spacing,
+        y: y,
+        role: member.role as Member['role'],
+      });
+    });
+  }
+
+  return positioned;
+}
 
 const MemberCard: React.FC<{ member: Member }> = ({ member }) => {
   const getRoleColor = (role: Member['role']) => {
@@ -45,14 +114,11 @@ const MemberCard: React.FC<{ member: Member }> = ({ member }) => {
   );
 };
 
-const Lines: React.FC = () => {
-  // Helper to get center top/bottom connection points
+const Lines: React.FC<{ members: Member[] }> = ({ members }) => {
   const getPoints = (member: Member) => ({
     top: { x: member.x + CARD_WIDTH / 2, y: member.y },
     bottom: { x: member.x + CARD_WIDTH / 2, y: member.y + CARD_HEIGHT },
   });
-
-  const members = orgData;
 
   return (
     <svg className="absolute top-0 left-0 w-full h-full pointer-events-none z-10 overflow-visible">
@@ -72,10 +138,6 @@ const Lines: React.FC = () => {
           <React.Fragment key={parent.id}>
             {children.map(child => {
               const cPts = getPoints(child);
-              // Calculate mid-y for ortholinear routing
-              // If child is directly below, midY is halfway.
-              // If child is far down, maybe we need a specific offset?
-              // For now, let's try a fixed offset from parent bottom or dynamic based on vertical distance.
               const verticalGap = cPts.top.y - pPts.bottom.y;
               const midY = pPts.bottom.y + (verticalGap / 2);
 
@@ -98,6 +160,87 @@ const Lines: React.FC = () => {
 };
 
 const StrukturOrganisasi: React.FC = () => {
+  const [members, setMembers] = useState<Member[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchOrganization = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`${API_URL}/api/organization`);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch: ${response.status}`);
+        }
+        const data: OrganizationMember[] = await response.json();
+        const positioned = calculatePositions(data);
+        setMembers(positioned);
+        setError(null);
+      } catch (err) {
+        console.error('Failed to fetch organization:', err);
+        setError('Gagal memuat data struktur organisasi');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrganization();
+  }, []);
+
+  if (loading) {
+    return (
+      <section className="py-10 px-5 bg-gray-100">
+        <div className="max-w-6xl mx-auto text-center">
+          <h2 className="text-3xl font-bold text-gray-800 mb-2">Struktur Organisasi</h2>
+          <p className="text-gray-600 mb-8">Kelurahan Cakung Barat</p>
+          <div className="bg-white rounded-2xl shadow-xl h-[400px] flex items-center justify-center">
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+              className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full"
+            />
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="py-10 px-5 bg-gray-100">
+        <div className="max-w-6xl mx-auto text-center">
+          <h2 className="text-3xl font-bold text-gray-800 mb-2">Struktur Organisasi</h2>
+          <p className="text-gray-600 mb-8">Kelurahan Cakung Barat</p>
+          <div className="bg-white rounded-2xl shadow-xl h-[400px] flex items-center justify-center">
+            <div className="text-red-500 text-center">
+              <p className="text-lg font-medium">{error}</p>
+              <button
+                onClick={() => window.location.reload()}
+                className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+              >
+                Coba Lagi
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (members.length === 0) {
+    return (
+      <section className="py-10 px-5 bg-gray-100">
+        <div className="max-w-6xl mx-auto text-center">
+          <h2 className="text-3xl font-bold text-gray-800 mb-2">Struktur Organisasi</h2>
+          <p className="text-gray-600 mb-8">Kelurahan Cakung Barat</p>
+          <div className="bg-white rounded-2xl shadow-xl h-[400px] flex items-center justify-center">
+            <p className="text-gray-500">Belum ada data struktur organisasi</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="py-10 px-5 bg-gray-100">
       <div className="max-w-6xl mx-auto text-center">
@@ -122,8 +265,8 @@ const StrukturOrganisasi: React.FC = () => {
                 </div>
                 <TransformComponent wrapperStyle={{ width: '100%', height: '100%' }}>
                   <div className="relative" style={{ width: '1400px', height: '800px' }}>
-                    <Lines />
-                    {orgData.map(member => (
+                    <Lines members={members} />
+                    {members.map(member => (
                       <MemberCard key={member.id} member={member} />
                     ))}
                   </div>
