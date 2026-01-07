@@ -48,6 +48,9 @@ const Chatbot: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(true); // Initial 3-second display
+  const [isHovering, setIsHovering] = useState(false);
+  const [initialTooltipDone, setInitialTooltipDone] = useState(false);
   const chatBodyRef = useRef<HTMLDivElement>(null);
 
   // Get or create session ID from sessionStorage
@@ -58,6 +61,21 @@ const Chatbot: React.FC = () => {
   const setSessionId = (sessionId: string) => {
     sessionStorage.setItem(SESSION_KEY, sessionId);
   };
+
+  // Hide tooltip after 3 seconds on initial load
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowTooltip(false);
+      setInitialTooltipDone(true);
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Check if device is mobile
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
+
+  // Determine if tooltip should be visible
+  const isTooltipVisible = !isOpen && (showTooltip || (!isMobile && isHovering && initialTooltipDone));
 
   // Scroll to bottom when new messages arrive
   useEffect(() => {
@@ -200,39 +218,163 @@ const Chatbot: React.FC = () => {
 
   return (
     <div className="relative">
-      {/* Chat icon dengan animasi glassmorphism */}
-      <motion.img
-        src="/cakung-barat/chat-icon.png"
-        alt="Chat"
-        id="chat-toggle"
-        className="w-14 h-14 fixed bottom-6 right-6 cursor-pointer z-[999] rounded-full bg-white shadow-lg p-2"
-        style={{
-          background: 'rgba(255, 255, 255, 0.25)',
-          backdropFilter: 'blur(10px)',
-          WebkitBackdropFilter: 'blur(10px)',
-          border: '1px solid rgba(255, 255, 255, 0.18)',
-          boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.37)'
-        }}
-        onClick={openChat}
-        whileHover={{
-          scale: 1.1,
-          boxShadow: '0 0 20px rgba(30, 144, 255, 0.5)'
-        }}
-        whileTap={{ scale: 0.95 }}
-        animate={isPulsing ? {
-          scale: [1, 1.1, 1],
-          rotate: [0, 2, -2, 0]
-        } : {}}
-        onError={(e) => {
-          const target = e.target as HTMLImageElement;
-          target.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="%231E90FF"/><path d="M8 12h8M12 8v8" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>';
-        }}
-        transition={{
-          scale: { duration: 2, repeat: Infinity, repeatType: "reverse" },
-          rotate: { duration: 3, repeat: Infinity, repeatType: "reverse" }
-        }}
-        onAnimationComplete={() => isPulsing && setIsPulsing(true)}
-      />
+      {/* Floating Chat Button with Service Indicators */}
+      <div
+        className="fixed bottom-6 right-6 z-[999]"
+        onMouseEnter={() => setIsHovering(true)}
+        onMouseLeave={() => setIsHovering(false)}
+      >
+        {/* Service Badge - Shows 3 letter types */}
+        <AnimatePresence>
+          {isTooltipVisible && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.8, y: 10 }}
+              className="absolute bottom-20 right-0 bg-white rounded-xl shadow-2xl p-3 w-[220px] sm:w-[260px] sm:p-4 sm:rounded-2xl"
+              style={{
+                background: 'linear-gradient(135deg, #ffffff, #f8fafc)',
+                border: '1px solid rgba(59, 130, 246, 0.2)',
+                boxShadow: '0 10px 40px rgba(59, 130, 246, 0.15)'
+              }}
+            >
+              <div className="text-xs sm:text-sm font-bold text-gray-800 mb-2 sm:mb-3 flex items-center gap-2">
+                <span className="text-base sm:text-lg">📄</span> Ajukan Surat Online
+              </div>
+              <div className="space-y-1.5 sm:space-y-2">
+                {/* SKTM */}
+                <div className="flex items-center gap-2 p-1.5 sm:p-2 bg-blue-50 rounded-lg">
+                  <span className="px-1.5 sm:px-2 py-0.5 bg-blue-500 text-white rounded text-[9px] sm:text-[10px] font-bold shrink-0">
+                    SKTM
+                  </span>
+                  <p className="text-[10px] sm:text-[11px] text-gray-600 leading-tight">
+                    Surat Keterangan Tidak Mampu
+                  </p>
+                </div>
+                {/* KPR */}
+                <div className="flex items-center gap-2 p-1.5 sm:p-2 bg-green-50 rounded-lg">
+                  <span className="px-1.5 sm:px-2 py-0.5 bg-green-500 text-white rounded text-[9px] sm:text-[10px] font-bold shrink-0">
+                    KPR
+                  </span>
+                  <p className="text-[10px] sm:text-[11px] text-gray-600 leading-tight">
+                    Surat Pengantar RT
+                  </p>
+                </div>
+                {/* NIB/NPWP */}
+                <div className="flex items-center gap-2 p-1.5 sm:p-2 bg-purple-50 rounded-lg">
+                  <span className="px-1.5 sm:px-2 py-0.5 bg-purple-500 text-white rounded text-[9px] sm:text-[10px] font-bold shrink-0">
+                    NIB
+                  </span>
+                  <p className="text-[10px] sm:text-[11px] text-gray-600 leading-tight">
+                    Surat NIB/NPWP Usaha
+                  </p>
+                </div>
+              </div>
+              <p className="text-[9px] sm:text-[10px] text-gray-400 mt-2 sm:mt-3 text-center italic">
+                Klik untuk mulai mengajukan
+              </p>
+              {/* Arrow pointer */}
+              <div
+                className="absolute -bottom-2 right-5 sm:right-6 w-3 h-3 sm:w-4 sm:h-4 rotate-45"
+                style={{
+                  background: '#f8fafc',
+                  borderRight: '1px solid rgba(59, 130, 246, 0.2)',
+                  borderBottom: '1px solid rgba(59, 130, 246, 0.2)'
+                }}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Notification Badge */}
+        {!isOpen && (
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            className="absolute -top-1 -right-1 w-6 h-6 bg-gradient-to-r from-red-500 to-pink-500 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-lg z-10"
+            style={{
+              boxShadow: '0 2px 8px rgba(239, 68, 68, 0.4)'
+            }}
+          >
+            3
+          </motion.div>
+        )}
+
+        {/* Main Chat Button */}
+        <motion.button
+          onClick={openChat}
+          className="relative w-16 h-16 rounded-full flex items-center justify-center cursor-pointer overflow-hidden"
+          style={{
+            background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
+            boxShadow: '0 8px 32px rgba(59, 130, 246, 0.4)'
+          }}
+          whileHover={{
+            scale: 1.1,
+            boxShadow: '0 12px 40px rgba(59, 130, 246, 0.5)'
+          }}
+          whileTap={{ scale: 0.95 }}
+          animate={isPulsing && !isOpen ? {
+            scale: [1, 1.05, 1],
+            boxShadow: [
+              '0 8px 32px rgba(59, 130, 246, 0.4)',
+              '0 12px 40px rgba(139, 92, 246, 0.5)',
+              '0 8px 32px rgba(59, 130, 246, 0.4)'
+            ]
+          } : {}}
+          transition={isPulsing ? {
+            duration: 2,
+            repeat: Infinity,
+            repeatType: "reverse",
+            ease: "easeInOut"
+          } : {}}
+        >
+          {/* Animated gradient ring */}
+          <motion.div
+            className="absolute inset-0 rounded-full"
+            style={{
+              background: 'linear-gradient(135deg, transparent, rgba(255,255,255,0.2))'
+            }}
+            animate={{
+              rotate: [0, 360]
+            }}
+            transition={{
+              duration: 8,
+              repeat: Infinity,
+              ease: "linear"
+            }}
+          />
+
+          {/* Chat Icon */}
+          <svg
+            className="w-8 h-8 text-white relative z-10"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+            />
+          </svg>
+
+          {/* Ripple effect on pulse */}
+          {isPulsing && !isOpen && (
+            <motion.div
+              className="absolute inset-0 rounded-full border-2 border-white/30"
+              initial={{ scale: 1, opacity: 0.5 }}
+              animate={{ scale: 1.5, opacity: 0 }}
+              transition={{
+                duration: 1.5,
+                repeat: Infinity,
+                ease: "easeOut"
+              }}
+            />
+          )}
+        </motion.button>
+      </div>
+
 
       {/* Chat window - Responsive: full screen on mobile, wider on desktop */}
       <AnimatePresence>
