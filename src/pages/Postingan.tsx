@@ -1,20 +1,30 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { usePageHeader } from '../contexts/PageHeaderContext';
-import PostCard from '../components/PostCard';
 import PostDetailModal from '../components/PostDetailModal';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import { Search, Filter, Calendar } from 'lucide-react';
-import { apiService } from '../api';
+import { usePosting } from '../contexts/PostingContext';
+import { assetService } from '../services/asset.service';
 import type { Post } from '../api/dto/posting.dto';
+import { motion } from 'framer-motion';
 
 const Postingan: React.FC = () => {
   const { setHeader } = usePageHeader();
+  const { posts, loading, error, fetchPosts } = usePosting();
+
+  console.log('[POSTINGAN] Component state:', {
+    postsCount: posts.length,
+    loading,
+    error,
+    posts: posts.map(p => ({ id: p.id, title: p.title, folder_id: p.folder_id }))
+  });
 
   useEffect(() => {
+    console.log('[POSTINGAN] Header useEffect triggered');
     setHeader(
-      'Postingan & Berita',
-      'Ikuti berita terkini, pengumuman penting, dan kegiatan terbaru dari Kelurahan Cakung Barat.'
+      'Galeri Postingan',
+      'Lihat galeri foto kegiatan dan berita terbaru dari Kelurahan Cakung Barat.'
     );
   }, [setHeader]);
 
@@ -24,29 +34,11 @@ const Postingan: React.FC = () => {
   const [filterCategory, setFilterCategory] = useState('all');
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
 
   useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        setLoading(true);
-        const fetchedPosts = await apiService.getAllPostings();
-        setPosts(fetchedPosts);
-        setError(null);
-      } catch (err) {
-        console.error('Error fetching posts:', err);
-        setError('Gagal memuat postingan. Silakan coba lagi nanti.');
-        setPosts([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchPosts();
-  }, []);
+  }, [fetchPosts]);
 
 
   const categories = ['all', ...new Set(posts.map(post => post.category))];
@@ -60,8 +52,8 @@ const Postingan: React.FC = () => {
 
   const filteredAndSortedPosts = posts
     .filter(post => {
-      const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                           post.excerpt.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        post.excerpt.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesCategory = filterCategory === 'all' || post.category === filterCategory;
       return matchesSearch && matchesCategory;
     })
@@ -122,19 +114,92 @@ const Postingan: React.FC = () => {
   const selectedPost = selectedPostId ? posts.find(post => post.id === selectedPostId) : null;
 
 
-  const convertApiPostToCardPost = (apiPost: Post) => {
+  const [postImages, setPostImages] = useState<Record<string, string[]>>({});
+  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8080';
 
-    const img = apiPost.img && apiPost.img.length > 0 
-      ? `https://placehold.co/400x200?text=Image+${apiPost.img[0]}` 
-      : 'https://placehold.co/400x200?text=No+Image';
-    
+  useEffect(() => {
+    // Fetch images for all posts
+    const fetchImages = async () => {
+      console.log('[POSTINGAN] 🖼️ Starting fetchImages');
+      console.log('[POSTINGAN] API_BASE_URL:', API_BASE_URL);
+      console.log('[POSTINGAN] Posts to process:', posts.length);
+      const imageMap: Record<string, string[]> = {};
+
+      for (const post of posts) {
+        console.log('[POSTINGAN] ---Processing post---');
+        console.log('[POSTINGAN] Post ID:', post.id);
+        console.log('[POSTINGAN] Post Title:', post.title);
+        console.log('[POSTINGAN] Folder ID:', post.folder_id);
+
+        if (post.folder_id) {
+          try {
+            console.log('[POSTINGAN] Fetching assets from folder:', post.folder_id);
+            const assets = await assetService.listFolder(post.folder_id);
+            console.log('[POSTINGAN] ✅ Assets fetched successfully:', assets.length, 'assets');
+
+            if (assets && assets.length > 0) {
+              // Convert relative URLs to absolute URLs and store ALL images
+              const fullUrls = assets.map(asset => {
+                const fullUrl = `${API_BASE_URL}${asset.url}`;
+                console.log('[POSTINGAN] Asset URL conversion:', {
+                  original: asset.url,
+                  full: fullUrl,
+                  filename: asset.filename
+                });
+                return fullUrl;
+              });
+
+              imageMap[post.id] = fullUrls;
+              console.log('[POSTINGAN] ✅ Stored', fullUrls.length, 'images for post', post.id);
+            } else {
+              console.warn('[POSTINGAN] ⚠️ No assets found for post', post.id);
+            }
+          } catch (error) {
+            console.error('[POSTINGAN] ❌ Failed to fetch assets for post', post.id, ':', error);
+          }
+        } else {
+          console.warn('[POSTINGAN] ⚠️ Post', post.id, 'has no folder_id');
+        }
+      }
+
+      console.log('[POSTINGAN] 🎯 Final image map:', imageMap);
+      console.log('[POSTINGAN] 🎯 Total posts with images:', Object.keys(imageMap).length);
+      setPostImages(imageMap);
+      console.log('[POSTINGAN] ✅ fetchImages completed');
+    };
+
+    if (posts.length > 0) {
+      console.log('[POSTINGAN] Triggering fetchImages because posts changed');
+      fetchImages();
+    } else {
+      console.log('[POSTINGAN] No posts to fetch images for');
+    }
+  }, [posts, API_BASE_URL]);
+
+  const convertApiPostToCardPost = (apiPost: Post) => {
+    // Use the first image from the post's images array, or placeholder
+    const images = postImages[apiPost.id] || [];
+    const hasNoFolder = !apiPost.folder_id;
+    const isLoadingImage = Boolean(apiPost.folder_id && images.length === 0);
+    const img = images[0] || (hasNoFolder ? 'https://placehold.co/400x200?text=No+Image' : 'https://placehold.co/400x200?text=Loading');
+
+    console.log('[POSTINGAN] convertApiPostToCardPost:', {
+      postId: apiPost.id,
+      imagesAvailable: images.length,
+      selectedImage: img,
+      isLoadingImage,
+      hasNoFolder
+    });
 
     const date = apiPost.date || formatDate(apiPost.created_at) || 'Tanggal tidak tersedia';
-    
+
     return {
       ...apiPost,
       img,
-      date
+      images, // Pass all images for carousel
+      date,
+      isLoadingImage,
+      hasNoFolder
     };
   };
 
@@ -142,7 +207,7 @@ const Postingan: React.FC = () => {
 
   return (
     <section className="py-16 px-5 bg-gray-50">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         {/* Filter dan Search Section */}
         <div className="mb-12">
           <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
@@ -199,7 +264,7 @@ const Postingan: React.FC = () => {
                 </Select>
               </div>
             </div>
-            
+
             {/* Jumlah postingan yang ditemukan */}
             <div className="mt-4 text-sm text-gray-600">
               Ditemukan {filteredAndSortedPosts.length} postingan
@@ -207,12 +272,12 @@ const Postingan: React.FC = () => {
           </div>
         </div>
 
-        {/* Posts Grid */}
+        {/* Gallery Grid */}
         {loading ? (
           <div className="flex justify-center items-center h-64">
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-              <p className="mt-4 text-gray-600">Memuat postingan...</p>
+              <p className="mt-4 text-gray-600">Memuat galeri...</p>
             </div>
           </div>
         ) : error ? (
@@ -226,30 +291,69 @@ const Postingan: React.FC = () => {
             <p className="text-gray-500 mt-2">Postingan akan muncul di sini ketika sudah tersedia</p>
           </div>
         ) : filteredAndSortedPosts.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredAndSortedPosts.map((post) => (
-              <PostCard 
-                key={post.id} 
-                post={convertApiPostToCardPost(post)} 
-                onPostClick={handlePostClick} 
-              />
-            ))}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {filteredAndSortedPosts.map((post, index) => {
+              const postData = convertApiPostToCardPost(post);
+              return (
+                <motion.div
+                  key={post.id}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.3, delay: index * 0.05 }}
+                  className="relative aspect-square group cursor-pointer overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-all duration-300"
+                  onClick={() => handlePostClick(post.id)}
+                >
+                  {/* Image */}
+                  {postData.isLoadingImage ? (
+                    <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                    </div>
+                  ) : (
+                    <img
+                      src={postData.img}
+                      alt={post.title}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    />
+                  )}
+
+                  {/* Overlay with title on hover */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
+                    <span className="text-xs text-blue-300 font-medium mb-1">{post.category}</span>
+                    <h3 className="text-white font-semibold text-sm line-clamp-2">{post.title}</h3>
+                    <span className="text-gray-300 text-xs mt-1">{postData.date}</span>
+                  </div>
+
+                  {/* Category badge */}
+                  <div className="absolute top-3 left-3 bg-blue-600/90 text-white text-xs font-medium px-2 py-1 rounded-full">
+                    {post.category}
+                  </div>
+
+                  {/* Multiple images indicator */}
+                  {postData.images && postData.images.length > 1 && (
+                    <div className="absolute top-3 right-3 bg-black/60 text-white text-xs font-medium px-2 py-1 rounded-full flex items-center gap-1">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      {postData.images.length}
+                    </div>
+                  )}
+                </motion.div>
+              );
+            })}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div className="col-span-full text-center py-12">
-              <h3 className="text-lg font-medium text-gray-900">Postingan tidak ditemukan</h3>
-              <p className="text-gray-500 mt-2">Coba kata kunci atau filter lainnya</p>
-            </div>
+          <div className="text-center py-12">
+            <h3 className="text-lg font-medium text-gray-900">Postingan tidak ditemukan</h3>
+            <p className="text-gray-500 mt-2">Coba kata kunci atau filter lainnya</p>
           </div>
         )}
 
         {/* Modal Detail Postingan */}
         {selectedPostForModal && isModalOpen && (
-          <PostDetailModal 
-            post={selectedPostForModal} 
-            isOpen={isModalOpen} 
-            onClose={handleCloseModal} 
+          <PostDetailModal
+            post={selectedPostForModal}
+            isOpen={isModalOpen}
+            onClose={handleCloseModal}
           />
         )}
       </div>

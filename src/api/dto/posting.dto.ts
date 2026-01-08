@@ -27,7 +27,6 @@ export interface CreatePostingRequest {
   title: string;
   category: string;
   excerpt: string;
-  img?: string[] | null;
 }
 
 export interface Posting {
@@ -39,7 +38,7 @@ export interface Posting {
   asset_ids: string[];
   created_at?: string | null;
   updated_at?: string | null;
-  img?: string[] | null;
+  folder_id?: string | null;
 }
 
 export interface PostingResponse {
@@ -51,14 +50,14 @@ export interface PostingResponse {
   asset_ids: string[];
   created_at?: string | null;
   updated_at?: string | null;
-  img?: string[] | null;
+  folder_id?: string | null;
 }
 
 export interface UpdatePostingRequest {
   title?: string | null;
   category?: string | null;
   excerpt?: string | null;
-  img?: string[] | null;
+  folder_id?: string | null;
 }
 
 export interface Post {
@@ -69,7 +68,7 @@ export interface Post {
   excerpt: string;
   created_at?: string | null;
   updated_at?: string | null;
-  img?: string[] | null;
+  folder_id?: string | null;
 }
 
 export interface ErrorResponse {

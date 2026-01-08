@@ -44,56 +44,58 @@ const Header: React.FC = () => {
   }, []);
 
   return (
-    <motion.header 
+    <motion.header
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.5 }}
-      className={`bg-[#054569] text-white py-2.5 sticky top-0 z-50 shadow-lg rounded-full w-4/5 max-w-6xl mx-auto transition-all duration-500 border-2 border-white ${isScrolling ? 'opacity-90 -translate-y-1' : 'opacity-100'}`}
+      className={`bg-[#054569]/90 backdrop-blur-md text-white py-2.5 sticky top-0 z-50 shadow-lg rounded-full w-4/5 max-w-6xl mx-auto transition-all duration-500 border-2 border-white/20 ${isScrolling ? 'opacity-90 -translate-y-1 py-2' : 'opacity-100'}`}
     >
       <div className="w-full mx-auto flex items-center justify-between px-4">
-        <motion.div 
+        <motion.div
           className="flex items-center gap-2.5"
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
         >
-          <img 
-            src={logoImg} 
-            alt="Logo" 
-            className="w-10 h-auto" 
-            onError={(e) => {
-              const target = e.target as HTMLImageElement;
-              target.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24"><rect width="24" height="24" fill="%231E90FF"/><text x="12" y="16" font-family="Arial" font-size="14" fill="white" text-anchor="middle">CB</text></svg>';
-            }} 
-          />
+          <motion.div whileHover={{ scale: 1.1 }} transition={{ type: "spring", stiffness: 400, damping: 10 }}>
+            <img
+              src={logoImg}
+              alt="Logo"
+              className="w-10 h-auto"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24"><rect width="24" height="24" fill="%231E90FF"/><text x="12" y="16" font-family="Arial" font-size="14" fill="white" text-anchor="middle">CB</text></svg>';
+              }}
+            />
+          </motion.div>
           <span className="font-bold text-lg text-white">Cakung Barat</span>
         </motion.div>
 
         {/* Desktop Menu */}
         <nav className="hidden md:flex">
           <ul className="list-none flex gap-6 items-center">
-            <motion.li 
+            <motion.li
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               transition={{ type: "spring", stiffness: 400, damping: 10 }}
             >
               <NavLink to="/" end className={({ isActive }) => `transition-colors duration-300 ${isActive ? 'underline' : 'hover:text-accent'}`}>Beranda</NavLink>
             </motion.li>
-            <motion.li 
+            <motion.li
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               transition={{ type: "spring", stiffness: 400, damping: 10 }}
             >
               <NavLink to="/profil" className={({ isActive }) => `transition-colors duration-300 ${isActive ? 'underline' : 'hover:text-accent'}`}>Profil</NavLink>
             </motion.li>
-            <motion.li 
+            <motion.li
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               transition={{ type: "spring", stiffness: 400, damping: 10 }}
             >
               <NavLink to="/pelayanan" className={({ isActive }) => `transition-colors duration-300 ${isActive ? 'underline' : 'hover:text-accent'}`}>Pelayanan</NavLink>
             </motion.li>
-            <motion.li 
+            <motion.li
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               transition={{ type: "spring", stiffness: 400, damping: 10 }}
@@ -121,14 +123,13 @@ const Header: React.FC = () => {
 
       {/* Mobile Menu */}
       <div
-        className={`md:hidden absolute top-full left-0 w-full bg-[#054569] transition-all duration-300 ease-in-out overflow-hidden rounded-b-2xl ${
-          isMenuOpen ? 'max-h-screen opacity-100 py-4' : 'max-h-0 opacity-0'
-        }`}
+        className={`md:hidden absolute top-full left-0 w-full bg-[#054569] transition-all duration-300 ease-in-out overflow-hidden rounded-b-2xl ${isMenuOpen ? 'max-h-screen opacity-100 py-4' : 'max-h-0 opacity-0'
+          }`}
       >
         <ul className="flex flex-col items-center gap-4">
           {isMenuOpen && (
             <>
-              <motion.li 
+              <motion.li
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: 0.1 }}
@@ -137,7 +138,7 @@ const Header: React.FC = () => {
               >
                 <NavLink to="/" end onClick={() => setIsMenuOpen(false)} className={({ isActive }) => `transition-colors duration-300 ${isActive ? 'underline' : 'hover:text-accent'}`}>Beranda</NavLink>
               </motion.li>
-              <motion.li 
+              <motion.li
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: 0.2 }}
@@ -146,7 +147,7 @@ const Header: React.FC = () => {
               >
                 <NavLink to="/profil" onClick={() => setIsMenuOpen(false)} className={({ isActive }) => `transition-colors duration-300 ${isActive ? 'underline' : 'hover:text-accent'}`}>Profil</NavLink>
               </motion.li>
-              <motion.li 
+              <motion.li
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: 0.3 }}
@@ -155,7 +156,7 @@ const Header: React.FC = () => {
               >
                 <NavLink to="/pelayanan" onClick={() => setIsMenuOpen(false)} className={({ isActive }) => `transition-colors duration-300 ${isActive ? 'underline' : 'hover:text-accent'}`}>Pelayanan</NavLink>
               </motion.li>
-              <motion.li 
+              <motion.li
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: 0.4 }}

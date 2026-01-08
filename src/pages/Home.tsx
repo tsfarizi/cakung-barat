@@ -2,15 +2,20 @@ import React, { useEffect, useState, useCallback } from 'react';
 import PostCard from '../components/PostCard';
 import PostDetailModal from '../components/PostDetailModal';
 import { usePageHeader } from '../contexts/PageHeaderContext';
-import { apiService } from '../api';
+import { usePosting } from '../contexts/PostingContext';
+import { assetService } from '../services/asset.service';
 import type { Post } from '../api/dto/posting.dto';
 
 const Home: React.FC = () => {
   const { setHeader } = usePageHeader();
+  const { posts, loading, error } = usePosting();
   const [isLoaded, setIsLoaded] = useState(false);
 
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const [postImages, setPostImages] = useState<Record<string, string[]>>({});
+  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8080';
 
   useEffect(() => {
     setHeader(
@@ -25,38 +30,42 @@ const Home: React.FC = () => {
     return () => clearTimeout(timer);
   }, [setHeader]);
 
-  const [allPosts, setAllPosts] = useState<Post[]>([]);
-  const [latestPosts, setLatestPosts] = useState<Post[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // Fetch images for all posts
   useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        setLoading(true);
-        const fetchedPosts = await apiService.getAllPostings();
-        setAllPosts(fetchedPosts);
-        
-        const sortedPosts = [...fetchedPosts]
-          .sort((a, b) => {
-            const dateA = a.created_at ? new Date(a.created_at) : a.date ? new Date(a.date) : new Date(0);
-            const dateB = b.created_at ? new Date(b.created_at) : b.date ? new Date(b.date) : new Date(0);
-            return dateB.getTime() - dateA.getTime();
-          })
-          .slice(0, 3);
-        
-        setLatestPosts(sortedPosts);
-        setError(null);
-      } catch (err) {
-        console.error('Error fetching posts:', err);
-        setError('Gagal memuat postingan terbaru. Silakan coba lagi nanti.');
-        setLatestPosts([]);
-      } finally {
-        setLoading(false);
+    const fetchImages = async () => {
+      if (posts.length === 0) return;
+
+      console.log('[HOME] Fetching images for', posts.length, 'posts');
+      const imageMap: Record<string, string[]> = {};
+
+      for (const post of posts) {
+        if (post.folder_id) {
+          try {
+            const assets = await assetService.listFolder(post.folder_id);
+            if (assets && assets.length > 0) {
+              imageMap[post.id] = assets.map(asset => `${API_BASE_URL}${asset.url}`);
+            }
+          } catch (error) {
+            console.error(`[HOME] Failed to fetch assets for post ${post.id}:`, error);
+          }
+        }
       }
+
+      setPostImages(imageMap);
+      console.log('[HOME] Images fetched for', Object.keys(imageMap).length, 'posts');
     };
 
-    fetchPosts();
-  }, []);
+    fetchImages();
+  }, [posts, API_BASE_URL]);
+
+  // Get latest 3 posts
+  const latestPosts = [...posts]
+    .sort((a, b) => {
+      const dateA = a.created_at ? new Date(a.created_at) : a.date ? new Date(a.date) : new Date(0);
+      const dateB = b.created_at ? new Date(b.created_at) : b.date ? new Date(b.date) : new Date(0);
+      return dateB.getTime() - dateA.getTime();
+    })
+    .slice(0, 3);
 
   const handlePostClick = (id: string) => {
     setSelectedPostId(id);
@@ -91,16 +100,20 @@ const Home: React.FC = () => {
   }, [handleHashChange]);
 
   const convertApiPostToCardPost = (apiPost: Post) => {
-    const img = apiPost.img && apiPost.img.length > 0
-      ? `https://placehold.co/400x200?text=Image+${apiPost.img[0]}`
-      : 'https://placehold.co/400x200?text=No+Image';
+    const images = postImages[apiPost.id] || [];
+    const hasNoFolder = !apiPost.folder_id;
+    const isLoadingImage = Boolean(apiPost.folder_id && images.length === 0);
+    const img = images[0] || (hasNoFolder ? 'https://placehold.co/400x200?text=No+Image' : 'https://placehold.co/400x200?text=Loading');
 
     const date = apiPost.date || formatDate(apiPost.created_at) || 'Tanggal tidak tersedia';
-    
+
     return {
       ...apiPost,
       img,
-      date
+      images, // Pass all images for carousel
+      date,
+      isLoadingImage,
+      hasNoFolder
     };
   };
 
@@ -110,7 +123,7 @@ const Home: React.FC = () => {
     return new Date(dateString).toLocaleDateString('id-ID', options);
   };
 
-  const selectedPost = selectedPostId ? allPosts.find(post => post.id === selectedPostId) : null;
+  const selectedPost = selectedPostId ? posts.find(post => post.id === selectedPostId) : null;
   const selectedPostForModal = selectedPost ? convertApiPostToCardPost(selectedPost) : null;
 
   return (
@@ -268,8 +281,8 @@ const Home: React.FC = () => {
                 <div className="mt-4 p-3 rounded-lg bg-linear-to-r from-blue-50 to-indigo-50 border border-blue-200">
                   <div className="text-sm text-gray-700">
                     <span className="font-medium">Status Saat Ini: </span>
-                    <span id="current-status" className={new Date().getHours() >= 7 && new Date().getHours() < 17 && [1,2,3,4,5].includes(new Date().getDay()) && !(new Date().getHours() >= 12 && new Date().getHours() < 13) ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}>
-                      {new Date().getHours() >= 7 && new Date().getHours() < 17 && [1,2,3,4,5].includes(new Date().getDay()) && !(new Date().getHours() >= 12 && new Date().getHours() < 13) ? 'Buka' : 'Tutup'}
+                    <span id="current-status" className={new Date().getHours() >= 7 && new Date().getHours() < 17 && [1, 2, 3, 4, 5].includes(new Date().getDay()) && !(new Date().getHours() >= 12 && new Date().getHours() < 13) ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}>
+                      {new Date().getHours() >= 7 && new Date().getHours() < 17 && [1, 2, 3, 4, 5].includes(new Date().getDay()) && !(new Date().getHours() >= 12 && new Date().getHours() < 13) ? 'Buka' : 'Tutup'}
                     </span>
                     <span className="ml-2">| Waktu Saat Ini: </span>
                     <span className="font-mono">{new Date().toLocaleTimeString('id-ID', { timeZone: 'Asia/Jakarta' })}</span>

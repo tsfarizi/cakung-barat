@@ -5,19 +5,22 @@ import Profil from './pages/Profil';
 import Pelayanan from './pages/Pelayanan';
 import Postingan from './pages/Postingan';
 import { PageHeaderProvider } from './contexts/PageHeaderContext';
+import { PostingProvider } from './contexts/PostingContext';
 
 function App() {
   return (
     <HashRouter>
       <PageHeaderProvider>
-        <Routes>
-          <Route element={<MainLayout />}>
-            <Route path="/" element={<Home />} />
-            <Route path="/profil" element={<Profil />} />
-            <Route path="/pelayanan" element={<Pelayanan />} />
-            <Route path="/postingan" element={<Postingan />} />
-          </Route>
-        </Routes>
+        <PostingProvider>
+          <Routes>
+            <Route element={<MainLayout />}>
+              <Route path="/" element={<Home />} />
+              <Route path="/profil" element={<Profil />} />
+              <Route path="/pelayanan" element={<Pelayanan />} />
+              <Route path="/postingan" element={<Postingan />} />
+            </Route>
+          </Routes>
+        </PostingProvider>
       </PageHeaderProvider>
     </HashRouter>
   );
