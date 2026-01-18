@@ -88,13 +88,13 @@ const Header: React.FC = () => {
             >
               <NavLink to="/profil" className={({ isActive }) => `transition-colors duration-300 ${isActive ? 'underline' : 'hover:text-accent'}`}>Profil</NavLink>
             </motion.li>
-            <motion.li
+            {/* <motion.li
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               transition={{ type: "spring", stiffness: 400, damping: 10 }}
             >
               <NavLink to="/pelayanan" className={({ isActive }) => `transition-colors duration-300 ${isActive ? 'underline' : 'hover:text-accent'}`}>Pelayanan</NavLink>
-            </motion.li>
+            </motion.li> */}
             <motion.li
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -147,7 +147,7 @@ const Header: React.FC = () => {
               >
                 <NavLink to="/profil" onClick={() => setIsMenuOpen(false)} className={({ isActive }) => `transition-colors duration-300 ${isActive ? 'underline' : 'hover:text-accent'}`}>Profil</NavLink>
               </motion.li>
-              <motion.li
+              {/* <motion.li
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: 0.3 }}
@@ -155,7 +155,7 @@ const Header: React.FC = () => {
                 whileTap={{ scale: 0.95 }}
               >
                 <NavLink to="/pelayanan" onClick={() => setIsMenuOpen(false)} className={({ isActive }) => `transition-colors duration-300 ${isActive ? 'underline' : 'hover:text-accent'}`}>Pelayanan</NavLink>
-              </motion.li>
+              </motion.li> */}
               <motion.li
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
