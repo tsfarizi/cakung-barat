@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import ChatCarousel from './ChatCarousel'; // Import the new ChatCarousel component
+import PostDetailModal from './PostDetailModal'; // Import the modal component
 
 interface PdfAttachment {
   filename: string;
@@ -9,10 +11,14 @@ interface PdfAttachment {
   mimeType: string;
 }
 
+// Updated Message interface to handle structured data
 interface Message {
   id: string;
   type: 'user' | 'bot';
-  content: string;
+  content: string; // For plain text responses
+  data?: {         // For structured data like posts
+    posts: any[];
+  };
   attachments?: PdfAttachment[];
 }
 
@@ -31,15 +37,22 @@ interface ToolStep {
   };
 }
 
+// ChatResponse interface reflects that content can be a string or an object
 interface ChatResponse {
   session_id: string;
-  content: string;
+  content: string | {
+    message: string; // The textual part of the response
+    data?: {        // The structured data part
+      posts: any[];
+    };
+  };
   provider: string;
   model: string;
   tool_steps: ToolStep[];
 }
 
 const CHAT_URL = import.meta.env.VITE_CHAT_URL || 'https://c2p9p0rq-8080.asse.devtunnels.ms/chat';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8080';
 const SESSION_KEY = 'chatbot_session_id';
 
 const Chatbot: React.FC = () => {
@@ -52,6 +65,12 @@ const Chatbot: React.FC = () => {
   const [isHovering, setIsHovering] = useState(false);
   const [initialTooltipDone, setInitialTooltipDone] = useState(false);
   const chatBodyRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // State for Post Detail Modal
+  const [selectedPost, setSelectedPost] = useState<any | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
 
   // Get or create session ID from sessionStorage
   const getSessionId = (): string | null => {
@@ -71,6 +90,15 @@ const Chatbot: React.FC = () => {
     return () => clearTimeout(timer);
   }, []);
 
+  // Auto-focus input when chat opens
+  useEffect(() => {
+    if (isOpen && inputRef.current && !isMobile) {
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 300);
+    }
+  }, [isOpen]);
+
   // Check if device is mobile
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
 
@@ -83,6 +111,13 @@ const Chatbot: React.FC = () => {
       chatBodyRef.current.scrollTop = chatBodyRef.current.scrollHeight;
     }
   }, [messages]);
+
+  // Handler for clicking a post card
+  const handlePostClick = (post: any) => {
+    setSelectedPost(post);
+    setIsOpen(false); // Hide chatbot window
+    setIsModalOpen(true); // Show modal
+  };
 
   // Send message to API
   const sendMessage = async (prompt: string) => {
@@ -131,6 +166,26 @@ const Chatbot: React.FC = () => {
         setSessionId(data.session_id);
       }
 
+      // Process the response content
+      let botMessageContent = '';
+      let structuredData = undefined;
+
+      if (typeof data.content === 'object' && data.content !== null) {
+        botMessageContent = data.content.message || ''; // Use message field for text
+        if (data.content.data && data.content.data.posts && data.content.data.posts.length > 0) {
+          // Process posts to ensure image URLs are absolute
+          const postsWithFixedUrls = data.content.data.posts.map((post: any) => ({
+            ...post,
+            image_url: post.image_url && post.image_url.startsWith('/') 
+              ? `${API_BASE_URL}${post.image_url}` 
+              : post.image_url
+          }));
+          structuredData = { posts: postsWithFixedUrls };
+        }
+      } else if (typeof data.content === 'string') {
+        botMessageContent = data.content; // It's a plain text response
+      }
+
       // Extract PDF attachments from tool_steps
       const pdfAttachments: PdfAttachment[] = [];
       if (data.tool_steps && data.tool_steps.length > 0) {
@@ -151,11 +206,12 @@ const Chatbot: React.FC = () => {
         }
       }
 
-      // Add bot response to chat
+      // Add bot response to chat, including structured data if present
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
         type: 'bot',
-        content: data.content,
+        content: botMessageContent,
+        data: structuredData,
         attachments: pdfAttachments.length > 0 ? pdfAttachments : undefined
       };
       setMessages(prev => [...prev, botMessage]);
@@ -171,6 +227,10 @@ const Chatbot: React.FC = () => {
       setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
+      // Refocus input after sending (desktop only)
+      if (!isMobile && inputRef.current) {
+        inputRef.current.focus();
+      }
     }
   };
 
@@ -305,7 +365,7 @@ const Chatbot: React.FC = () => {
           onClick={openChat}
           className="relative w-16 h-16 rounded-full flex items-center justify-center cursor-pointer overflow-hidden"
           style={{
-            background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
+            background: 'linear-gradient(to right, #2563eb, #4338ca)',
             boxShadow: '0 8px 32px rgba(59, 130, 246, 0.4)'
           }}
           whileHover={{
@@ -410,7 +470,7 @@ const Chatbot: React.FC = () => {
             <div
               className="chat-header"
               style={{
-                background: 'linear-gradient(135deg, rgba(30, 144, 255, 0.9), rgba(0, 100, 200, 0.9))',
+                background: 'linear-gradient(to right, #2563eb, #4338ca)',
                 backdropFilter: 'blur(10px)',
                 WebkitBackdropFilter: 'blur(10px)',
                 color: '#fff',
@@ -447,10 +507,10 @@ const Chatbot: React.FC = () => {
               id="chat-body"
               style={{
                 overflowY: 'auto',
-                padding: '20px',
+                padding: '16px', // Reduced from 20px
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '16px',
+                gap: '12px', // Reduced from 16px
                 backgroundColor: 'rgba(248, 250, 252, 0.5)'
               }}
             >
@@ -469,13 +529,13 @@ const Chatbot: React.FC = () => {
                   className={`message ${message.type === 'user' ? 'user-message' : 'bot-message'}`}
                   style={{
                     background: message.type === 'user'
-                      ? 'linear-gradient(135deg, rgba(30, 144, 255, 0.9), rgba(0, 100, 200, 0.9))'
+                      ? 'linear-gradient(to right, #2563eb, #4338ca)'
                       : 'rgba(255, 255, 255, 0.9)',
                     color: message.type === 'user' ? '#fff' : '#333',
-                    padding: '14px 18px',
+                    padding: '10px 14px', // Reduced padding
                     borderRadius: message.type === 'user'
-                      ? '20px 20px 4px 20px'
-                      : '20px 20px 20px 4px',
+                      ? '16px 16px 2px 16px'
+                      : '16px 16px 16px 2px',
                     maxWidth: '85%',
                     alignSelf: message.type === 'user' ? 'flex-end' : 'flex-start',
                     boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
@@ -486,27 +546,37 @@ const Chatbot: React.FC = () => {
                   transition={{ duration: 0.3, type: "spring", bounce: 0.3 }}
                 >
                   {message.type === 'bot' ? (
-                    <div className="prose prose-sm max-w-none prose-p:my-1 prose-headings:my-2 prose-ul:my-1 prose-ol:my-1 prose-li:my-0.5">
-                      <ReactMarkdown
-                        remarkPlugins={[remarkGfm]}
-                        components={{
-                          p: (props) => <p className="mb-2 last:mb-0" {...props} />,
-                          h1: (props) => <h1 className="text-lg font-bold mb-2 mt-3" {...props} />,
-                          h2: (props) => <h2 className="text-base font-bold mb-2 mt-3" {...props} />,
-                          h3: (props) => <h3 className="text-sm font-bold mb-1 mt-2" {...props} />,
-                          ul: (props) => <ul className="list-disc pl-4 mb-2" {...props} />,
-                          ol: (props) => <ol className="list-decimal pl-4 mb-2" {...props} />,
-                          li: (props) => <li className="mb-1" {...props} />,
-                          strong: (props) => <strong className="font-semibold" {...props} />,
-                          em: (props) => <em className="italic" {...props} />,
-                          code: (props) => <code className="bg-gray-100 px-1.5 py-0.5 rounded text-sm font-mono" {...props} />,
-                          pre: (props) => <pre className="bg-gray-100 p-3 rounded-lg my-2 overflow-x-auto text-sm" {...props} />,
-                          a: (props) => <a className="text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer" {...props} />,
-                          blockquote: (props) => <blockquote className="border-l-4 border-blue-400 pl-3 italic my-2 text-gray-600" {...props} />,
-                        }}
-                      >
-                        {message.content}
-                      </ReactMarkdown>
+                    <>
+                      {/* Render ChatCarousel if structured data (posts) exists */}
+                      {message.data?.posts && message.data.posts.length > 0 && (
+                        <ChatCarousel posts={message.data.posts} onPostClick={handlePostClick} />
+                      )}
+
+                      {/* Render text content if it exists */}
+                      {message.content && (
+                        <div className="prose prose-sm max-w-none prose-p:my-1 prose-headings:my-2 prose-ul:my-1 prose-ol:my-1 prose-li:my-0.5">
+                          <ReactMarkdown
+                            remarkPlugins={[remarkGfm]}
+                            components={{
+                              p: (props) => <p className="mb-2 last:mb-0" {...props} />,
+                              h1: (props) => <h1 className="text-lg font-bold mb-2 mt-3" {...props} />,
+                              h2: (props) => <h2 className="text-base font-bold mb-2 mt-3" {...props} />,
+                              h3: (props) => <h3 className="text-sm font-bold mb-1 mt-2" {...props} />,
+                              ul: (props) => <ul className="list-disc pl-4 mb-2" {...props} />,
+                              ol: (props) => <ol className="list-decimal pl-4 mb-2" {...props} />,
+                              li: (props) => <li className="mb-1" {...props} />,
+                              strong: (props) => <strong className="font-semibold" {...props} />,
+                              em: (props) => <em className="italic" {...props} />,
+                              code: (props) => <code className="bg-gray-100 px-1.5 py-0.5 rounded text-sm font-mono" {...props} />,
+                              pre: (props) => <pre className="bg-gray-100 p-3 rounded-lg my-2 overflow-x-auto text-sm" {...props} />,
+                              a: (props) => <a className="text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer" {...props} />,
+                              blockquote: (props) => <blockquote className="border-l-4 border-blue-400 pl-3 italic my-2 text-gray-600" {...props} />,
+                            }}
+                          >
+                            {message.content}
+                          </ReactMarkdown>
+                        </div>
+                      )}
 
                       {/* PDF Attachments */}
                       {message.attachments && message.attachments.length > 0 && (
@@ -546,7 +616,7 @@ const Chatbot: React.FC = () => {
                           ))}
                         </div>
                       )}
-                    </div>
+                    </>
                   ) : (
                     message.content
                   )}
@@ -593,6 +663,7 @@ const Chatbot: React.FC = () => {
               }}
             >
               <input
+                ref={inputRef}
                 type="text"
                 id="chat-input"
                 value={inputValue}
@@ -611,7 +682,7 @@ const Chatbot: React.FC = () => {
                 disabled={isLoading || !inputValue.trim()}
                 className="px-6 py-4 rounded-xl text-white font-medium text-base disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{
-                  background: 'linear-gradient(135deg, rgba(30, 144, 255, 1), rgba(0, 100, 200, 1))',
+                  background: 'linear-gradient(to right, #2563eb, #4338ca)',
                   boxShadow: '0 4px 12px rgba(30, 144, 255, 0.3)'
                 }}
                 whileHover={!isLoading && inputValue.trim() ? {
@@ -626,6 +697,16 @@ const Chatbot: React.FC = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Render PostDetailModal */}
+      <PostDetailModal
+        post={selectedPost}
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setIsOpen(true); // Re-open chatbot window
+        }}
+      />
 
       {/* Additional styles */}
       <style>{`
@@ -657,6 +738,22 @@ const Chatbot: React.FC = () => {
           #chat-toggle:has(+ .chat-window) {
             display: none;
           }
+        }
+
+        /* Custom scrollbar for carousel - Visible but thin */
+        .scrollbar-thin {
+          scrollbar-width: thin;
+          scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+        }
+        .scrollbar-thin::-webkit-scrollbar {
+          height: 6px;
+        }
+        .scrollbar-thin::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .scrollbar-thin::-webkit-scrollbar-thumb {
+          background-color: rgba(0, 0, 0, 0.2);
+          border-radius: 3px;
         }
       `}</style>
     </div>

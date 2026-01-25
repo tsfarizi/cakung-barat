@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import PostCard from '../components/PostCard';
 import PostDetailModal from '../components/PostDetailModal';
 import { usePageHeader } from '../contexts/PageHeaderContext';
@@ -8,7 +9,7 @@ import type { Post } from '../api/dto/posting.dto';
 
 const Home: React.FC = () => {
   const { setHeader } = usePageHeader();
-  const { posts, loading, error } = usePosting();
+  const { posts, loading, error, fetchPosts } = usePosting();
   const [isLoaded, setIsLoaded] = useState(false);
 
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
@@ -29,6 +30,11 @@ const Home: React.FC = () => {
 
     return () => clearTimeout(timer);
   }, [setHeader]);
+
+  // Fetch posts on mount
+  useEffect(() => {
+    fetchPosts();
+  }, [fetchPosts]);
 
   // Fetch images for all posts
   useEffect(() => {
@@ -154,8 +160,8 @@ const Home: React.FC = () => {
                   pelayanan publik bagi seluruh warga Cakung Barat.
                 </p>
               </div>
-              <a
-                href="/#/profil"
+              <Link
+                to="/profil"
                 className="flex items-center justify-center lg:justify-start bg-linear-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white font-bold py-4 px-8 rounded-xl transition-all duration-300 shadow-lg hover:shadow-2xl transform hover:-translate-y-0.5"
               >
                 <span className="text-lg">Lihat Profill Lengkap</span>
@@ -167,7 +173,7 @@ const Home: React.FC = () => {
                 >
                   <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
                 </svg>
-              </a>
+              </Link>
             </div>
           </div>
         </div>
