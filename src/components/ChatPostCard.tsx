@@ -7,20 +7,10 @@ import {
 import { Button } from "@/components/ui/button";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-
-interface Post {
-  id: string;
-  img: string;
-  category: string;
-  date: string;
-  title: string;
-  excerpt: string;
-  isLoadingImage?: boolean;
-  hasNoFolder?: boolean;
-}
+import type { ChatbotPost } from '../types/chatbot';
 
 interface PostCardProps {
-  post: Post;
+  post: ChatbotPost;
   onPostClick?: (id: string) => void;
 }
 
@@ -38,6 +28,8 @@ const ChatPostCard: React.FC<PostCardProps> = ({ post, onPostClick }) => {
     }
   };
 
+  const displayImage = post.img || post.image_url || 'https://placehold.co/400x200?text=No+Image';
+
   return (
     <>
       <Card className="overflow-hidden transition-all duration-300 hover:shadow-md border border-gray-200 rounded-lg h-full flex flex-col bg-white">
@@ -51,7 +43,7 @@ const ChatPostCard: React.FC<PostCardProps> = ({ post, onPostClick }) => {
             </div>
           ) : (
             <img
-              src={post.img}
+              src={displayImage}
               alt={post.title}
               className="w-full h-32 object-cover cursor-pointer hover:opacity-90 transition-opacity"
               onClick={handleImageClick}

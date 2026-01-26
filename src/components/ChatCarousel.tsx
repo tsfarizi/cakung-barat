@@ -2,19 +2,11 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import ChatPostCard from './ChatPostCard';
-
-interface ApiPost {
-  id: string;
-  image_url: string;
-  category: string;
-  date: string;
-  title: string;
-  excerpt: string;
-}
+import type { ChatbotPost } from '../types/chatbot';
 
 interface ChatCarouselProps {
-  posts: ApiPost[];
-  onPostClick: (post: any) => void;
+  posts: ChatbotPost[];
+  onPostClick: (post: ChatbotPost) => void;
 }
 
 const ChatCarousel: React.FC<ChatCarouselProps> = ({ posts, onPostClick }) => {
@@ -47,7 +39,7 @@ const ChatCarousel: React.FC<ChatCarouselProps> = ({ posts, onPostClick }) => {
               <ChatPostCard
                 post={{
                   ...currentPost,
-                  img: currentPost.image_url,
+                  img: currentPost.img || currentPost.image_url,
                   isLoadingImage: false
                 }}
                 onPostClick={() => onPostClick({

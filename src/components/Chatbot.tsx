@@ -2,54 +2,10 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import ChatCarousel from './ChatCarousel'; // Import the new ChatCarousel component
-import PostDetailModal from './PostDetailModal'; // Import the modal component
-
-interface PdfAttachment {
-  filename: string;
-  data: string; // Base64 encoded PDF
-  mimeType: string;
-}
-
-// Updated Message interface to handle structured data
-interface Message {
-  id: string;
-  type: 'user' | 'bot';
-  content: string; // For plain text responses
-  data?: {         // For structured data like posts
-    posts: any[];
-  };
-  attachments?: PdfAttachment[];
-}
-
-interface ToolStepContent {
-  type: string;
-  text?: string;
-  data?: string;
-  mimeType?: string;
-}
-
-interface ToolStep {
-  tool: string;
-  success: boolean;
-  output?: {
-    content?: ToolStepContent[];
-  };
-}
-
-// ChatResponse interface reflects that content can be a string or an object
-interface ChatResponse {
-  session_id: string;
-  content: string | {
-    message: string; // The textual part of the response
-    data?: {        // The structured data part
-      posts: any[];
-    };
-  };
-  provider: string;
-  model: string;
-  tool_steps: ToolStep[];
-}
+import ChatCarousel from './ChatCarousel';
+import PostDetailModal from './PostDetailModal';
+import ServiceTooltip from './chatbot/ServiceTooltip';
+import type { Message, ChatResponse, ChatbotPost, PdfAttachment } from '../types/chatbot';
 
 const CHAT_URL = import.meta.env.VITE_CHAT_URL || 'https://c2p9p0rq-8080.asse.devtunnels.ms/chat';
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8080';
@@ -68,7 +24,7 @@ const Chatbot: React.FC = () => {
   const inputRef = useRef<HTMLInputElement>(null);
 
   // State for Post Detail Modal
-  const [selectedPost, setSelectedPost] = useState<any | null>(null);
+  const [selectedPost, setSelectedPost] = useState<ChatbotPost | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
 
@@ -113,7 +69,7 @@ const Chatbot: React.FC = () => {
   }, [messages]);
 
   // Handler for clicking a post card
-  const handlePostClick = (post: any) => {
+  const handlePostClick = (post: ChatbotPost) => {
     setSelectedPost(post);
     setIsOpen(false); // Hide chatbot window
     setIsModalOpen(true); // Show modal
@@ -168,13 +124,13 @@ const Chatbot: React.FC = () => {
 
       // Process the response content
       let botMessageContent = '';
-      let structuredData = undefined;
+      let structuredData: { posts: ChatbotPost[] } | undefined = undefined;
 
       if (typeof data.content === 'object' && data.content !== null) {
         botMessageContent = data.content.message || ''; // Use message field for text
         if (data.content.data && data.content.data.posts && data.content.data.posts.length > 0) {
           // Process posts to ensure image URLs are absolute
-          const postsWithFixedUrls = data.content.data.posts.map((post: any) => ({
+          const postsWithFixedUrls: ChatbotPost[] = data.content.data.posts.map((post: ChatbotPost) => ({
             ...post,
             image_url: post.image_url && post.image_url.startsWith('/') 
               ? `${API_BASE_URL}${post.image_url}` 
@@ -287,62 +243,7 @@ const Chatbot: React.FC = () => {
         {/* Service Badge - Shows 3 letter types */}
         <AnimatePresence>
           {isTooltipVisible && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.8, y: 10 }}
-              className="absolute bottom-20 right-0 bg-white rounded-xl shadow-2xl p-3 w-[220px] sm:w-[260px] sm:p-4 sm:rounded-2xl"
-              style={{
-                background: 'linear-gradient(135deg, #ffffff, #f8fafc)',
-                border: '1px solid rgba(59, 130, 246, 0.2)',
-                boxShadow: '0 10px 40px rgba(59, 130, 246, 0.15)'
-              }}
-            >
-              <div className="text-xs sm:text-sm font-bold text-gray-800 mb-2 sm:mb-3 flex items-center gap-2">
-                <span className="text-base sm:text-lg">📄</span> Ajukan Surat Online
-              </div>
-              <div className="space-y-1.5 sm:space-y-2">
-                {/* SKTM */}
-                <div className="flex items-center gap-2 p-1.5 sm:p-2 bg-blue-50 rounded-lg">
-                  <span className="px-1.5 sm:px-2 py-0.5 bg-blue-500 text-white rounded text-[9px] sm:text-[10px] font-bold shrink-0">
-                    SKTM
-                  </span>
-                  <p className="text-[10px] sm:text-[11px] text-gray-600 leading-tight">
-                    Surat Keterangan Tidak Mampu
-                  </p>
-                </div>
-                {/* KPR */}
-                <div className="flex items-center gap-2 p-1.5 sm:p-2 bg-green-50 rounded-lg">
-                  <span className="px-1.5 sm:px-2 py-0.5 bg-green-500 text-white rounded text-[9px] sm:text-[10px] font-bold shrink-0">
-                    KPR
-                  </span>
-                  <p className="text-[10px] sm:text-[11px] text-gray-600 leading-tight">
-                    Surat Pengantar RT
-                  </p>
-                </div>
-                {/* NIB/NPWP */}
-                <div className="flex items-center gap-2 p-1.5 sm:p-2 bg-purple-50 rounded-lg">
-                  <span className="px-1.5 sm:px-2 py-0.5 bg-purple-500 text-white rounded text-[9px] sm:text-[10px] font-bold shrink-0">
-                    NIB
-                  </span>
-                  <p className="text-[10px] sm:text-[11px] text-gray-600 leading-tight">
-                    Surat NIB/NPWP Usaha
-                  </p>
-                </div>
-              </div>
-              <p className="text-[9px] sm:text-[10px] text-gray-400 mt-2 sm:mt-3 text-center italic">
-                Klik untuk mulai mengajukan
-              </p>
-              {/* Arrow pointer */}
-              <div
-                className="absolute -bottom-2 right-5 sm:right-6 w-3 h-3 sm:w-4 sm:h-4 rotate-45"
-                style={{
-                  background: '#f8fafc',
-                  borderRight: '1px solid rgba(59, 130, 246, 0.2)',
-                  borderBottom: '1px solid rgba(59, 130, 246, 0.2)'
-                }}
-              />
-            </motion.div>
+            <ServiceTooltip />
           )}
         </AnimatePresence>
 
@@ -700,7 +601,7 @@ const Chatbot: React.FC = () => {
 
       {/* Render PostDetailModal */}
       <PostDetailModal
-        post={selectedPost}
+        post={selectedPost as any}
         isOpen={isModalOpen}
         onClose={() => {
           setIsModalOpen(false);
